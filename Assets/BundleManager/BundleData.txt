@@ -1,0 +1,668 @@
+[
+    
+    {
+        "name" : "LA",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/LA.unity"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_diffuse.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Materials/constructor_done.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_normals.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/worker.FBX"
+        ],        
+        "includeGUIDs" : 
+        [
+            "f996e0a58a2968747b0fa4f8452878a4"
+        ],        
+        "dependGUIDs" : 
+        [
+            "97b050d43ac7c4d2b9f6cbb587650761",            
+            "ca49380a71a2bb64c830d06bd421b9d1",            
+            "531c14f8d5cdc4e5baa83ee6e16f783a",            
+            "449b48f7eb5d87a4baaa5fb73f875a59"
+        ],        
+        "sceneBundle" : true,        
+        "priority" : 1,        
+        "parent" : "",        
+        "children" : 
+        [
+            
+        ]
+    },    
+    
+    {
+        "name" : "LB",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/LB.unity"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_diffuse.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Materials/constructor_done.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_normals.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/worker.FBX"
+        ],        
+        "includeGUIDs" : 
+        [
+            "b795a1c581d774f43b962dbb276ba62c"
+        ],        
+        "dependGUIDs" : 
+        [
+            "97b050d43ac7c4d2b9f6cbb587650761",            
+            "ca49380a71a2bb64c830d06bd421b9d1",            
+            "531c14f8d5cdc4e5baa83ee6e16f783a",            
+            "449b48f7eb5d87a4baaa5fb73f875a59"
+        ],        
+        "sceneBundle" : true,        
+        "priority" : 3,        
+        "parent" : "",        
+        "children" : 
+        [
+            
+        ]
+    },    
+    
+    {
+        "name" : "LC",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/LC.unity"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_diffuse.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Materials/constructor_done.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_normals.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/worker.FBX"
+        ],        
+        "includeGUIDs" : 
+        [
+            "af320da7014bde442bc9831e5cefa15b"
+        ],        
+        "dependGUIDs" : 
+        [
+            "97b050d43ac7c4d2b9f6cbb587650761",            
+            "ca49380a71a2bb64c830d06bd421b9d1",            
+            "531c14f8d5cdc4e5baa83ee6e16f783a",            
+            "449b48f7eb5d87a4baaa5fb73f875a59"
+        ],        
+        "sceneBundle" : true,        
+        "priority" : 2,        
+        "parent" : "",        
+        "children" : 
+        [
+            
+        ]
+    },    
+    
+    {
+        "name" : "LD",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/LD.unity"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_diffuse.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Materials/constructor_done.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_normals.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/worker.FBX"
+        ],        
+        "includeGUIDs" : 
+        [
+            "51d2f760c41088443bfe1490b1823c70"
+        ],        
+        "dependGUIDs" : 
+        [
+            "97b050d43ac7c4d2b9f6cbb587650761",            
+            "ca49380a71a2bb64c830d06bd421b9d1",            
+            "531c14f8d5cdc4e5baa83ee6e16f783a",            
+            "449b48f7eb5d87a4baaa5fb73f875a59"
+        ],        
+        "sceneBundle" : true,        
+        "priority" : 0,        
+        "parent" : "",        
+        "children" : 
+        [
+            
+        ]
+    },    
+    
+    {
+        "name" : "sub/LBaseA",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/LBaseA.unity"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_diffuse.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Materials/constructor_done.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_normals.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/worker.FBX"
+        ],        
+        "includeGUIDs" : 
+        [
+            "07bdf08b06153f24bae43c0f23e0d932"
+        ],        
+        "dependGUIDs" : 
+        [
+            "97b050d43ac7c4d2b9f6cbb587650761",            
+            "ca49380a71a2bb64c830d06bd421b9d1",            
+            "531c14f8d5cdc4e5baa83ee6e16f783a",            
+            "449b48f7eb5d87a4baaa5fb73f875a59"
+        ],        
+        "sceneBundle" : true,        
+        "priority" : 0,        
+        "parent" : "",        
+        "children" : 
+        [
+            "sub/LA-A"
+        ]
+    },    
+    
+    {
+        "name" : "LBaseB",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/LBaseB.unity"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_diffuse.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Materials/constructor_done.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_normals.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/worker.FBX"
+        ],        
+        "includeGUIDs" : 
+        [
+            "0525b5817716f6f4b907d0c5293050a3"
+        ],        
+        "dependGUIDs" : 
+        [
+            "97b050d43ac7c4d2b9f6cbb587650761",            
+            "ca49380a71a2bb64c830d06bd421b9d1",            
+            "531c14f8d5cdc4e5baa83ee6e16f783a",            
+            "449b48f7eb5d87a4baaa5fb73f875a59"
+        ],        
+        "sceneBundle" : true,        
+        "priority" : 0,        
+        "parent" : "",        
+        "children" : 
+        [
+            "AB-A"
+        ]
+    },    
+    
+    {
+        "name" : "ABaseA",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/worker.FBX"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_diffuse.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Materials/constructor_done.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_normals.png"
+        ],        
+        "includeGUIDs" : 
+        [
+            "449b48f7eb5d87a4baaa5fb73f875a59"
+        ],        
+        "dependGUIDs" : 
+        [
+            "97b050d43ac7c4d2b9f6cbb587650761",            
+            "ca49380a71a2bb64c830d06bd421b9d1",            
+            "531c14f8d5cdc4e5baa83ee6e16f783a"
+        ],        
+        "sceneBundle" : false,        
+        "priority" : 0,        
+        "parent" : "",        
+        "children" : 
+        [
+            "AA-A"
+        ]
+    },    
+    
+    {
+        "name" : "ABaseB",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/worker.FBX"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_diffuse.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Materials/constructor_done.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_normals.png"
+        ],        
+        "includeGUIDs" : 
+        [
+            "449b48f7eb5d87a4baaa5fb73f875a59"
+        ],        
+        "dependGUIDs" : 
+        [
+            "97b050d43ac7c4d2b9f6cbb587650761",            
+            "ca49380a71a2bb64c830d06bd421b9d1",            
+            "531c14f8d5cdc4e5baa83ee6e16f783a"
+        ],        
+        "sceneBundle" : false,        
+        "priority" : 0,        
+        "parent" : "",        
+        "children" : 
+        [
+            "LB-A"
+        ]
+    },    
+    
+    {
+        "name" : "AA",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/worker.FBX"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_diffuse.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Materials/constructor_done.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_normals.png"
+        ],        
+        "includeGUIDs" : 
+        [
+            "449b48f7eb5d87a4baaa5fb73f875a59"
+        ],        
+        "dependGUIDs" : 
+        [
+            "97b050d43ac7c4d2b9f6cbb587650761",            
+            "ca49380a71a2bb64c830d06bd421b9d1",            
+            "531c14f8d5cdc4e5baa83ee6e16f783a"
+        ],        
+        "sceneBundle" : false,        
+        "priority" : 0,        
+        "parent" : "",        
+        "children" : 
+        [
+            "AAA"
+        ]
+    },    
+    
+    {
+        "name" : "ABaseC",        
+        "includs" : 
+        [
+            "Assets/BundleManager/textures/assetBundleIcon.png",            
+            "Assets/BundleManager/textures/dependedAsset.png"
+        ],        
+        "dependAssets" : 
+        [
+            
+        ],        
+        "includeGUIDs" : 
+        [
+            "81bc1f6167a1451419e75392f57c8062",            
+            "bffe253667825f247941db31b904beb2"
+        ],        
+        "dependGUIDs" : 
+        [
+            
+        ],        
+        "sceneBundle" : false,        
+        "priority" : 0,        
+        "parent" : "",        
+        "children" : 
+        [
+            "ACA",            
+            "ACB"
+        ]
+    },    
+    
+    {
+        "name" : "LE",        
+        "includs" : 
+        [
+            
+        ],        
+        "dependAssets" : 
+        [
+            
+        ],        
+        "includeGUIDs" : 
+        [
+            
+        ],        
+        "dependGUIDs" : 
+        [
+            
+        ],        
+        "sceneBundle" : false,        
+        "priority" : 0,        
+        "parent" : "",        
+        "children" : 
+        [
+            
+        ]
+    },    
+    
+    {
+        "name" : "sub/LA-A",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/LA-A.unity"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_diffuse.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Materials/constructor_done.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_normals.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/worker.FBX"
+        ],        
+        "includeGUIDs" : 
+        [
+            "5193bd67bf849dd46befc62461b5d439"
+        ],        
+        "dependGUIDs" : 
+        [
+            "97b050d43ac7c4d2b9f6cbb587650761",            
+            "ca49380a71a2bb64c830d06bd421b9d1",            
+            "531c14f8d5cdc4e5baa83ee6e16f783a",            
+            "449b48f7eb5d87a4baaa5fb73f875a59"
+        ],        
+        "sceneBundle" : true,        
+        "priority" : 0,        
+        "parent" : "sub/LBaseA",        
+        "children" : 
+        [
+            
+        ]
+    },    
+    
+    {
+        "name" : "AB-A",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/worker.FBX"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_diffuse.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Materials/constructor_done.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_normals.png"
+        ],        
+        "includeGUIDs" : 
+        [
+            "449b48f7eb5d87a4baaa5fb73f875a59"
+        ],        
+        "dependGUIDs" : 
+        [
+            "97b050d43ac7c4d2b9f6cbb587650761",            
+            "ca49380a71a2bb64c830d06bd421b9d1",            
+            "531c14f8d5cdc4e5baa83ee6e16f783a"
+        ],        
+        "sceneBundle" : false,        
+        "priority" : 0,        
+        "parent" : "LBaseB",        
+        "children" : 
+        [
+            
+        ]
+    },    
+    
+    {
+        "name" : "AA-A",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/worker.FBX"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_diffuse.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Materials/constructor_done.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_normals.png"
+        ],        
+        "includeGUIDs" : 
+        [
+            "449b48f7eb5d87a4baaa5fb73f875a59"
+        ],        
+        "dependGUIDs" : 
+        [
+            "97b050d43ac7c4d2b9f6cbb587650761",            
+            "ca49380a71a2bb64c830d06bd421b9d1",            
+            "531c14f8d5cdc4e5baa83ee6e16f783a"
+        ],        
+        "sceneBundle" : false,        
+        "priority" : 0,        
+        "parent" : "ABaseA",        
+        "children" : 
+        [
+            
+        ]
+    },    
+    
+    {
+        "name" : "LB-A",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/LB-A.unity"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_diffuse.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Materials/constructor_done.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_normals.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/worker.FBX"
+        ],        
+        "includeGUIDs" : 
+        [
+            "c787b6ffa42f51f4d9bced1afd564ad5"
+        ],        
+        "dependGUIDs" : 
+        [
+            "97b050d43ac7c4d2b9f6cbb587650761",            
+            "ca49380a71a2bb64c830d06bd421b9d1",            
+            "531c14f8d5cdc4e5baa83ee6e16f783a",            
+            "449b48f7eb5d87a4baaa5fb73f875a59"
+        ],        
+        "sceneBundle" : true,        
+        "priority" : 0,        
+        "parent" : "ABaseB",        
+        "children" : 
+        [
+            
+        ]
+    },    
+    
+    {
+        "name" : "AAA",        
+        "includs" : 
+        [
+            "Assets/BundleManager/textures/assetBundleIcon.png"
+        ],        
+        "dependAssets" : 
+        [
+            
+        ],        
+        "includeGUIDs" : 
+        [
+            "81bc1f6167a1451419e75392f57c8062"
+        ],        
+        "dependGUIDs" : 
+        [
+            
+        ],        
+        "sceneBundle" : false,        
+        "priority" : 0,        
+        "parent" : "AA",        
+        "children" : 
+        [
+            "AAAA"
+        ]
+    },    
+    
+    {
+        "name" : "AAAA",        
+        "includs" : 
+        [
+            "Assets/BundleManager/textures/dependedAsset.png"
+        ],        
+        "dependAssets" : 
+        [
+            
+        ],        
+        "includeGUIDs" : 
+        [
+            "bffe253667825f247941db31b904beb2"
+        ],        
+        "dependGUIDs" : 
+        [
+            
+        ],        
+        "sceneBundle" : false,        
+        "priority" : 0,        
+        "parent" : "AAA",        
+        "children" : 
+        [
+            "LAAAA"
+        ]
+    },    
+    
+    {
+        "name" : "LAAAA",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/LAAAA.unity"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_diffuse.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Materials/constructor_done.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_normals.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/worker.FBX"
+        ],        
+        "includeGUIDs" : 
+        [
+            "502ea73cb03619c49af17fe95b11a0f7"
+        ],        
+        "dependGUIDs" : 
+        [
+            "97b050d43ac7c4d2b9f6cbb587650761",            
+            "ca49380a71a2bb64c830d06bd421b9d1",            
+            "531c14f8d5cdc4e5baa83ee6e16f783a",            
+            "449b48f7eb5d87a4baaa5fb73f875a59"
+        ],        
+        "sceneBundle" : true,        
+        "priority" : 0,        
+        "parent" : "AAAA",        
+        "children" : 
+        [
+            "LAAAAA"
+        ]
+    },    
+    
+    {
+        "name" : "LAAAAA",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/LAAAAA.unity"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/textures/assetBundleIcon.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_diffuse.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Materials/constructor_done.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/Textures/constructor_normals.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/prefabs/Cube.prefab",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/mats/cube1.mat",            
+            "Assets/BundleManager/textures/dependedAsset.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/mats/sphere.mat",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/prefabs/Sphere.prefab",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/charaterRes/worker.FBX"
+        ],        
+        "includeGUIDs" : 
+        [
+            "4ab2a7343234d7241b648307eb58512e"
+        ],        
+        "dependGUIDs" : 
+        [
+            "81bc1f6167a1451419e75392f57c8062",            
+            "97b050d43ac7c4d2b9f6cbb587650761",            
+            "ca49380a71a2bb64c830d06bd421b9d1",            
+            "531c14f8d5cdc4e5baa83ee6e16f783a",            
+            "f884a172111508c4ca87d3491529cce3",            
+            "16c7c762b3925604cbd889dbd73a04ad",            
+            "bffe253667825f247941db31b904beb2",            
+            "1759b6501a4712a489a905a308794584",            
+            "a56d95be5acc17c40ae9f627f93b3ad0",            
+            "449b48f7eb5d87a4baaa5fb73f875a59"
+        ],        
+        "sceneBundle" : true,        
+        "priority" : 0,        
+        "parent" : "LAAAA",        
+        "children" : 
+        [
+            
+        ]
+    },    
+    
+    {
+        "name" : "ACA",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/prefabs/Cube.prefab"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/textures/assetBundleIcon.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/mats/cube1.mat"
+        ],        
+        "includeGUIDs" : 
+        [
+            "f884a172111508c4ca87d3491529cce3"
+        ],        
+        "dependGUIDs" : 
+        [
+            "81bc1f6167a1451419e75392f57c8062",            
+            "16c7c762b3925604cbd889dbd73a04ad"
+        ],        
+        "sceneBundle" : false,        
+        "priority" : 0,        
+        "parent" : "ABaseC",        
+        "children" : 
+        [
+            
+        ]
+    },    
+    
+    {
+        "name" : "ACB",        
+        "includs" : 
+        [
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/prefabs/Sphere.prefab"
+        ],        
+        "dependAssets" : 
+        [
+            "Assets/BundleManager/textures/dependedAsset.png",            
+            "Assets/BundleManager/TestDownloadManager/BundleAssets/mats/sphere.mat"
+        ],        
+        "includeGUIDs" : 
+        [
+            "a56d95be5acc17c40ae9f627f93b3ad0"
+        ],        
+        "dependGUIDs" : 
+        [
+            "bffe253667825f247941db31b904beb2",            
+            "1759b6501a4712a489a905a308794584"
+        ],        
+        "sceneBundle" : false,        
+        "priority" : 0,        
+        "parent" : "ABaseC",        
+        "children" : 
+        [
+            
+        ]
+    }
+]

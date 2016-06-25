@@ -1,0 +1,9 @@
+{
+    "compress" : true,    
+    "deterministicBundle" : false,    
+    "bundleSuffix" : "assetBundle",    
+    "buildOutputPath" : "",    
+    "useCache" : true,    
+    "downloadThreadsCount" : 1,    
+    "downloadRetryTime" : 2
+}
