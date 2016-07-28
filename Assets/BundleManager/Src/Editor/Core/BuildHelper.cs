@@ -14,7 +14,21 @@ using System.Linq;
  */ 
 public class BuildHelper 
 {
-	/**
+    public static void RefreshBundleChanged(BundleData bundle)
+    {
+        var state = BundleManager.GetBuildStateOfBundle(bundle.name);
+        if (!state.changed)
+        {
+            if (IsBundleChanged(bundle))
+            {
+                state.changed = true;
+                BundleManager.MarkParentsNeedBuild(bundle);
+                BMDataAccessor.ShouldSaveBundleStates = true;
+            }
+        }
+    }
+
+    /**
 	 * Copy the configeration files to target directory.
 	 */ 
 	public static void ExportBMDatasToOutput()
@@ -73,58 +87,41 @@ public class BuildHelper
 		          	Path.Combine( exportPath, Path.GetFileName(BMDataAccessor.BMConfigerPath) ), 
 					true );
 	}
-	
-	/**
-	 * Detect if the bundle need update.
-	 */ 
-	public static bool IsBundleNeedBunild(BundleData bundle)
-	{	
-		string outputPath = GenerateOutputPathForBundle(bundle.name);
-		if(!File.Exists(outputPath))
-			return true;
-		
-		BundleBuildState bundleBuildState = BundleManager.GetBuildStateOfBundle(bundle.name);
-		DateTime lastBuildTime = File.GetLastWriteTime(outputPath);
-		DateTime bundleChangeTime = bundleBuildState.changeTime == -1 ? DateTime.MaxValue : DateTime.FromBinary(bundleBuildState.changeTime);
-		if( System.DateTime.Compare(lastBuildTime, bundleChangeTime) < 0 )
-		{
-			return true;
-		}
-		
-		string[] assetPaths = GetAssetsFromPaths(BundleManager.GUIDsToPaths(bundle.includeGUIDs.ToArray()), bundle.sceneBundle);
-		string[] dependencies = AssetDatabase.GetDependencies(assetPaths);
-		if( !EqualStrArray(dependencies, bundleBuildState.lastBuildDependencies) )
-			return true; // Build depenedencies list changed.
-		
-		foreach(string file in dependencies)
-		{
-			if(DateTime.Compare(lastBuildTime, File.GetLastWriteTime(file)) < 0)
-				return true;
-		}
-		
-		if(bundle.parent != "")
-		{
-			BundleData parentBundle = BundleManager.GetBundleData(bundle.parent);
-			if(parentBundle != null)
-			{
-				if(IsBundleNeedBunild(parentBundle))
-					return true;
-			}
-			else
-			{
-				Debug.LogError("Cannot find bundle");
-			}
-		}
-		
-		return false;
-	}
-	
-	/**
+
+    public static void BuildSelections(string[] selections)
+    {
+        BMDataAccessor.AssetStates.Clear();
+        foreach (string bundleName in selections)
+        {
+            var bundle = BundleManager.GetBundleData(bundleName);
+            BundleManager.RefreshBundleDependencies(bundle);
+            BuildHelper.RefreshBundleChanged(bundle);
+        }
+        BuildBundles(selections);
+    }
+
+    public static void RebuildSelection(string[] selections)
+    {
+        foreach (string bundleName in selections)
+        {
+            var bundle = BundleManager.GetBundleData(bundleName);
+            BundleManager.RefreshBundleDependencies(bundle);
+            BundleManager.GetBuildStateOfBundle(bundleName).changed = true;
+        }
+        BuildBundles(selections);
+    }
+
+    /**
 	 * Build all bundles.
 	 */
 	public static void BuildAll()
-	{	
-		BuildBundles(BundleManager.bundles.Select(bundle=>bundle.name).ToArray());
+	{
+	    BMDataAccessor.AssetStates.Clear();
+	    foreach (var bundle in BundleManager.bundles)
+	    {
+	        BundleManager.RefreshBundleDependencies(bundle);
+	        BuildHelper.RefreshBundleChanged(bundle);
+	    }
 	}
 	
 	/**
@@ -132,13 +129,22 @@ public class BuildHelper
 	 */
 	public static void RebuildAll()
 	{
-		foreach(BundleBuildState bundle in BundleManager.buildStates)
-			bundle.lastBuildDependencies = null;
-		
-		BuildAll();
+	    foreach (var  bundle in BundleManager.bundles)
+	    {
+            BundleManager.RefreshBundleDependencies(bundle);
+	        BundleManager.GetBuildStateOfBundle(bundle.name).changed = true;
+	    }
+	    BMDataAccessor.DependencyUpdated = true;
+        DirectBuildAll();
 	}
-	
-	/**
+
+
+    public static void DirectBuildAll()
+    {
+        BuildBundles(BundleManager.bundles.Select(bundle => bundle.name).ToArray());
+    }
+
+    /**
 	 * Build bundles.
 	 */
 	public static void BuildBundles(string[] bundles)
@@ -158,13 +164,15 @@ public class BuildHelper
 	internal static void AddBundleToBuildList(string bundleName, ref Dictionary<string, List<string>> buildingRoutes)	
 	{
 		BundleData bundle = BundleManager.GetBundleData(bundleName);
+	    var state = BundleManager.GetBuildStateOfBundle(bundleName);
 		if(bundle == null)
 		{
 			Debug.LogError("Cannot find bundle " + bundleName);
 			return;
 		}
 			
-		if( BuildHelper.IsBundleNeedBunild(bundle) )
+		//if( BuildHelper.IsBundleNeedBunild(bundle) )
+        if(state.changed)
 		{
 			string rootName = BundleManager.GetRootOf(bundle.name);
 			if(buildingRoutes.ContainsKey(rootName))
@@ -181,10 +189,6 @@ public class BuildHelper
 				buildingRoutes.Add(rootName, buildingList);
 			}
 		}
-		else
-		{
-			Debug.Log("Bundle " + bundle.name + " skiped.");
-		}
 	}
 	
 	internal static bool BuildBundleTree(BundleData bundle, List<string> requiredBuildList)
@@ -195,15 +199,16 @@ public class BuildHelper
 		if(!succ)
 		{
 			Debug.LogError(bundle.name + " build failed.");
-			BuildPipeline.PopAssetDependencies();
-			return false;
+            //为了实现能够跳过build错误的bundle继续进行打包而注释
+			//BuildPipeline.PopAssetDependencies();
+			//return false;
 		}
 		else
 		{
 			Debug.Log(bundle.name + " build succeed.");
 		}
 		
-		foreach(string childName in bundle.children)
+		foreach(string childName in bundle.GetChildren())
 		{
 			BundleData child = BundleManager.GetBundleData(childName);
 			if(child == null)
@@ -239,20 +244,20 @@ public class BuildHelper
 	}
 	
 	// Get scene or plain assets from include paths
-	internal static string[] GetAssetsFromPaths(string[] includeList, bool onlySceneFiles)
+	internal static string[] GetAssetsFromPaths(string[] includeList, BundleType bundleType)
 	{
 		// Get all the includes file's paths
 		List<string> files = new List<string>();
 		foreach(string includPath in includeList)
 		{
-			files.AddRange(GetAssetsFromPath(includPath, onlySceneFiles));
+            files.AddRange(GetAssetsFromPath(includPath, bundleType));
 		}
 		
 		return files.ToArray();
 	}
 
 	// Get scene or plain assets from path
-	internal static string[] GetAssetsFromPath(string path, bool onlySceneFiles)
+    internal static string[] GetAssetsFromPath(string path, BundleType bundleType)
 	{
 		if(!File.Exists(path) && !Directory.Exists(path))
 			return new string[]{};
@@ -261,7 +266,7 @@ public class BuildHelper
 		bool isSceneFile = Path.GetExtension(path) == ".unity";
 		if(!isDir)
 		{
-			if(onlySceneFiles && !isSceneFile)
+            if (bundleType==BundleType.Scene && !isSceneFile)
 				// If onlySceneFiles is true, we can't add file without "unity" extension
 				return new string[]{};
 			
@@ -270,11 +275,21 @@ public class BuildHelper
 		else
 		{
 			string[] subFiles = null;
-			if(onlySceneFiles)
-				subFiles = FindSceneFileInDir(path, SearchOption.AllDirectories);
-			else
-				subFiles = FindAssetsInDir(path, SearchOption.AllDirectories);
-			
+		    switch (bundleType)
+		    {
+                case BundleType.Normal:
+                    subFiles = FindAssetsInDir(path, SearchOption.AllDirectories);
+                    break;
+                case BundleType.Scene:
+                     subFiles = FindSceneFileInDir(path, SearchOption.AllDirectories);
+                    break;
+                case BundleType.Text:
+                     subFiles = FindTextAssetsInDir(path, SearchOption.AllDirectories);
+                    break;
+                default:
+		            throw new System.NotFiniteNumberException();
+
+		    }
 			return subFiles;
 		}
 	}
@@ -283,7 +298,10 @@ public class BuildHelper
 	{
 		return Directory.GetFiles(dir, "*.unity", option);
 	}
-	
+    private static string[] FindTextAssetsInDir(string dir, SearchOption option)
+    {
+        return Directory.GetFiles(dir, "*.bytes", option);
+    }
 	private static string[] FindAssetsInDir(string dir, SearchOption option)
 	{
 		List<string> files = new List<string>( Directory.GetFiles(dir, "*.*", option) );
@@ -362,40 +380,63 @@ public class BuildHelper
 	
 	private static bool BuildSingleBundle(BundleData bundle)
 	{
+	    var extra = bundle.GetExtraData();
+        
 		// Prepare bundle output dictionary
 		string outputPath = GenerateOutputPathForBundle(bundle.name);
 		string bundleStoreDir = Path.GetDirectoryName(outputPath);
 		if(!Directory.Exists(bundleStoreDir))
 			Directory.CreateDirectory(bundleStoreDir);
-		
-		// Start build
-		string[] assetPaths = GetAssetsFromPaths(BundleManager.GUIDsToPaths(bundle.includeGUIDs.ToArray()), bundle.sceneBundle);
+
+	    if (extra.includeAssetPaths.Count == 0)
+	    {
+            BundleManager.RefreshBundleDependencies(bundle);
+	    }
+
+	    // Start build
+	    string[] assetPaths = extra.includeAssetPaths.ToArray();
 		bool succeed = false;
 		uint crc = 0;
-		if(bundle.sceneBundle)
-			succeed = BuildSceneBundle(assetPaths, outputPath, out crc);
-		else
-			succeed = BuildAssetBundle(assetPaths, outputPath, out crc);
-		
+	    switch (bundle.bundleType)
+	    {
+	        case BundleType.Normal:
+                succeed = BuildSceneBundle(assetPaths, outputPath, out crc);
+                break;
+            case BundleType.Scene:
+	            succeed = BuildSceneBundle(assetPaths, outputPath, out crc);
+                break;
+            case BundleType.Text:
+	            succeed = BuildSceneBundle(assetPaths, outputPath, out crc);
+                break;
+            default:
+                throw new NotImplementedException();
+	    }
+
 		// Remember the assets for next time build test
 		BundleBuildState buildState = BundleManager.GetBuildStateOfBundle(bundle.name);
 		if(succeed)
 		{
-			buildState.lastBuildDependencies = AssetDatabase.GetDependencies(assetPaths);
-			buildState.version++;
-			if(buildState.version == int.MaxValue)
-				buildState.version = 0;
+		    foreach (var guid in extra.includeAssetGUIDs)
+		    {
+		        buildState.assetStates[guid] = BundleManager.GetAssetState(guid);
+		    }
+		    foreach (var guid in extra.dependGUIDs)
+		    {
+		        buildState.assetStates[guid] = BundleManager.GetAssetState(guid);
+		    }
+
+		    buildState.assetListMd5 = GetBundleAssetsListMD5(bundle);
 
 			buildState.crc = crc;
+		    buildState.changed = true;
+		    buildState.requestString = bundle.name + "." + BuildConfiger.BundleSuffix;
 			FileInfo bundleFileInfo = new FileInfo(outputPath);
 			buildState.size = bundleFileInfo.Length;
+		    extra.needBuild = false;
+		    m_BuiltCount++;
+
+		    BMDataAccessor.ShouldSaveBundleStates = true;
 		}
-		else
-		{
-			buildState.lastBuildDependencies = null;
-		}
-		
-		BMDataAccessor.SaveBundleBuildeStates();
 		return succeed;
 	}
 	
@@ -420,4 +461,57 @@ public class BuildHelper
 	{
 		return Path.Combine(BuildConfiger.InterpretedOutputPath, bundleName + "." + BuildConfiger.BundleSuffix);
 	}
+
+    private static bool IsBundleChanged(BundleData bundle)
+    {
+        var state = BundleManager.GetBuildStateOfBundle(bundle.name);
+        if (state.changed) return true;
+        var extra = bundle.GetExtraData();
+
+        if (bundle.bundleType == BundleType.Text)
+        {
+            //HACK:文本bundles中往往包含大量文件，所以永远重新打包
+            return true;
+        }
+
+        if (GetBundleAssetsListMD5(bundle) != state.assetListMd5)
+        {
+            return true;
+        }
+
+        //判断所有涉及的文件是否有变化，如有，则需要重新打包
+        foreach (var guid in extra.includeAssetGUIDs)
+        {
+            if (!state.assetStates.ContainsKey(guid))
+            {
+                return true;
+            }
+            else if (BundleManager.CheckAssetModified(state.assetStates[guid]))
+            {
+                return true;
+            }
+        }
+        foreach (var guid in extra.dependGUIDs)
+        {
+            if (!state.assetStates.ContainsKey(guid))
+            {
+                return true;
+            }
+            else if(BundleManager.CheckAssetModified(state.assetStates[guid]))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private static string GetBundleAssetsListMD5(BundleData bundle)
+    {
+        var str = string.Join(string.Empty, bundle.includeGUIDs.ToArray()) +
+                  string.Join(string.Empty, bundle.GetExtraData().dependGUIDs.ToArray());
+        return ZipFile.md5.getMd5Hash(System.Text.Encoding.ASCII.GetBytes(str));
+    }
+
+    private static int m_BuiltCount;
 }

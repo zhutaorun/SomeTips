@@ -7,17 +7,18 @@ public class BuildTargetWatcher
 {
 	static BuildTargetWatcher()
 	{
-		OnBuildTargetChanged();
+		//OnBuildTargetChanged();
 
 		EditorUserBuildSettings.activeBuildTargetChanged += OnBuildTargetChanged;
 	}
 
 	static void OnBuildTargetChanged()
 	{
-		if(BuildConfiger.UseEditorTarget)
-		{
-			BuildConfiger.UnityBuildTarget = EditorUserBuildSettings.activeBuildTarget;
-			BMDataAccessor.SaveUrls();
-		}
+        //if(BuildConfiger.UseEditorTarget)
+        //{
+        //    BuildConfiger.UnityBuildTarget = EditorUserBuildSettings.activeBuildTarget;
+        //    BMDataAccessor.SaveUrls();
+        //}
+        BundleManager.RefreshAll();
 	}
 }

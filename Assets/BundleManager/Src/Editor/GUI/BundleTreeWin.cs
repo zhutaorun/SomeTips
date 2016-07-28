@@ -33,6 +33,9 @@ internal class BundleTreeWin : EditorWindow
 	private const float m_ItemHeight = 20f;
 	
 	private GUIDragHandler m_DragHandler = null;
+
+    private GUIContent m_InfoIcon;
+    private GUIContent m_WarnIcon;
 	
 	public string LastSelection()
 	{
@@ -109,12 +112,18 @@ internal class BundleTreeWin : EditorWindow
 					{
 						menu.AddItem(new GUIContent("Scene Bundle"), false, CreateSceneBundle);
 						menu.AddItem(new GUIContent("Asset Bundle"), false, CreateAssetBundle);
+                        menu.AddItem(new GUIContent("Text Bundle"), false, CreateTextBundle);
 					}
 					else
 					{
 						menu.AddItem(new GUIContent("Scene Bundle"), false, null);
 						menu.AddItem(new GUIContent("Asset Bundle"), false, null);
+                        menu.AddItem(new GUIContent("Text Bundle"), false, null);
 					}
+				    if (m_Selections.Count == 1)
+				    {
+				        menu.AddItem(new GUIContent("Quick Create"),false,QuickCreateAssetBundle);
+				    }
 					menu.DropDown(createBtnRect);
 				}
 				
@@ -130,8 +139,8 @@ internal class BundleTreeWin : EditorWindow
 					menu.AddItem(new GUIContent("Clear"), false, ClearOutputs);
 					menu.DropDown(buildBtnRect);
 				}
-				
-				GUILayout.FlexibleSpace();
+
+			    GUILayout.FlexibleSpace();
 
 				if(GUILayout.Button("Settings", EditorStyles.toolbarButton))
 					BMSettingsEditor.Show();
@@ -205,6 +214,8 @@ internal class BundleTreeWin : EditorWindow
 	
 	Rect GUI_DrawItem(BundleData bundle, int indent)
 	{
+	    var extra = bundle.GetExtraData();
+	    var state = BundleManager.GetBuildStateOfBundle(bundle.name);
 		bool isEditing = m_CurrentEditing == bundle.name;
 		bool isRecieving = m_CurrentRecieving == bundle.name;
 		bool isSelected = m_Selections.Contains(bundle.name);
@@ -217,7 +228,7 @@ internal class BundleTreeWin : EditorWindow
 		
 		Rect itemRect = EditorGUILayout.BeginHorizontal(currentLableStyle);
 		
-		if(bundle.children.Count == 0)
+		if(bundle.GetChildren().Count == 0)
 		{
 			GUILayout.Space(m_IndentWidth * indent + m_NoToggleIndent);
 		}
@@ -227,8 +238,22 @@ internal class BundleTreeWin : EditorWindow
 			bool fold = !GUILayout.Toggle(!IsFold(bundle.name), "", BMGUIStyles.GetStyle("Foldout"));
 			SetFold(bundle.name, fold);
 		}
-		
-		GUILayout.Label(bundle.sceneBundle ? BMGUIStyles.GetIcon("sceneBundleIcon") : BMGUIStyles.GetIcon("assetBundleIcon"), BMGUIStyles.GetStyle("BItemLabelNormal"), GUILayout.ExpandWidth(false));
+
+	    Texture2D bundleIcon = null;
+	    switch (bundle.bundleType)
+	    {
+	        case BundleType.Scene:
+	            bundleIcon = BMGUIStyles.GetIcon("sceneBundleIcon");
+                break;
+            case BundleType.Text:
+	            bundleIcon = BMGUIStyles.GetIcon("textBundleIcon");
+                break;
+            default:
+	            bundleIcon = BMGUIStyles.GetIcon("assetBundleIcon");
+                break;
+	    }
+        GUILayout.Label(bundleIcon, BMGUIStyles.GetStyle("BItemLabelNormal"),GUILayout.ExpandWidth(false));
+        //GUILayout.Label(bundle.sceneBundle ? BMGUIStyles.GetIcon("sceneBundleIcon") : BMGUIStyles.GetIcon("assetBundleIcon"), BMGUIStyles.GetStyle("BItemLabelNormal"), GUILayout.ExpandWidth(false));
 		
 		if(!isEditing)
 		{
@@ -239,8 +264,20 @@ internal class BundleTreeWin : EditorWindow
 			GUI.SetNextControlName(m_EditTextFeildName);
 			m_EditString = GUILayout.TextField(m_EditString, BMGUIStyles.GetStyle("TreeEditField"));
 		}
-		
-		EditorGUILayout.EndHorizontal();
+
+	    var r = GUILayoutUtility.GetLastRect();
+	    r.x = r.xMax - 20;
+	    r.height = 20;
+	    if (state.changed)
+	    {
+            GUI.Label(r, m_WarnIcon);
+	    }
+	    else if(extra.needBuild)
+	    {
+	        GUI.Label(r,m_InfoIcon);
+	    }
+
+	    EditorGUILayout.EndHorizontal();
 		
 		return itemRect;
 	}
@@ -249,12 +286,12 @@ internal class BundleTreeWin : EditorWindow
 	{
 		BundleData bundleData = BundleManager.GetBundleData(bundleName);
 		
-		if(bundleData.children.Count == 0 || IsFold(bundleName))
+		if(bundleData.GetChildren().Count == 0 || IsFold(bundleName))
 			return true;
 		
-		for(int i = 0; i < bundleData.children.Count; ++i)
+		for(int i = 0; i < bundleData.GetChildren().Count; ++i)
 		{
-			if(!GUI_TreeItem(indent + 1, bundleData.children[i]))
+			if(!GUI_TreeItem(indent + 1, bundleData.GetChildren()[i]))
 				return false;
 		}
 		
@@ -349,8 +386,19 @@ internal class BundleTreeWin : EditorWindow
 				Repaint();
 				return false;
 			}
-		
-			// If lose focus, end this edit
+
+		    if (Event.current.type == EventType.ValidateCommand)
+		    {
+                if(Event.current.commandName=="Paste")Event.current.Use();
+		    }
+		    else if(Event.current.type == EventType.ExecuteCommand)
+		    {
+		        if (Event.current.commandName == "Paste")
+		        {
+		            m_EditString += EditorGUIUtility.systemCopyBuffer;
+		        }
+		    }
+		    // If lose focus, end this edit
 			bool clickOutSideTheTextField = m_CurrentEditing != "" && Event.current.type == EventType.MouseDown && !IsRectClicked(itemRect);
 			bool isFinishedEdit = Event.current.type == EventType.KeyUp && Event.current.keyCode == KeyCode.Return;
 			if(!HasFocuse() || clickOutSideTheTextField || isFinishedEdit)
@@ -595,20 +643,37 @@ internal class BundleTreeWin : EditorWindow
 	void CreateSceneBundle()
 	{
 		if(m_Selections.Count == 1)
-			newDefBundleTo(m_Selections[0], true);
+			newDefBundleTo(m_Selections[0], BundleType.Scene);
 		else
-			newDefBundleTo("", true);
+            newDefBundleTo("", BundleType.Scene);
 	}
 	
 	void CreateAssetBundle()
 	{
 		if(m_Selections.Count == 1)
-			newDefBundleTo(m_Selections[0], false);
+			newDefBundleTo(m_Selections[0], BundleType.Normal);
 		else
-			newDefBundleTo("", false);
+            newDefBundleTo("", BundleType.Normal);
 	}
-	
-	void newDefBundleTo(string parent, bool sceneBundle)
+
+    void CreateTextBundle()
+    {
+        if (m_Selections.Count == 1)
+            newDefBundleTo(m_Selections[0], BundleType.Text);
+        else
+            newDefBundleTo("", BundleType.Text);
+    }
+    void QuickCreateAssetBundle()
+    {
+        var parent = "";
+        if (m_Selections.Count == 1) parent = m_Selections[0];
+        foreach (var asset in Selection.objects)
+        {
+            CreateBundleFromAssetWithFolder(asset,parent);
+        }
+    }
+
+    void newDefBundleTo(string parent, BundleType bundleType)
 	{
 		// Find a new bundle name
 		string defBundleName = "EmptyBundle";
@@ -618,8 +683,8 @@ internal class BundleTreeWin : EditorWindow
 		{
 			currentBundleName = defBundleName + (++index);
 		}
-		
-		bool created = BundleManager.CreateNewBundle(currentBundleName, parent, sceneBundle);
+
+        bool created = BundleManager.CreateNewBundle(currentBundleName, parent, bundleType);
 		if(created)
 		{
 			if(IsFold( parent ))
@@ -631,8 +696,47 @@ internal class BundleTreeWin : EditorWindow
 		
 		StartEditBundleName(currentBundleName);
 	}
-	
-	void BuildAll()
+
+    private void CreateBundleFromAssetWithFolder(Object asset,string parent = "")
+    {
+        var path = AssetDatabase.GetAssetOrScenePath(asset);
+        if(!path.StartsWith("Assets")) return;
+
+        string defBundleName = System.IO.Path.GetFileNameWithoutExtension(path);
+        string currentBundleName = defBundleName;
+
+        //int index = 0;
+        //while (BundleManager.GetBundleData(currentBundleName)!=null)
+        //{
+        //    currentBundleName = defBundleName + (++index);
+        //}
+        currentBundleName = parent + "/" + currentBundleName;
+        if (BundleManager.GetBundleData(currentBundleName) != null)
+        {
+            Debug.Log("Skip ["+currentBundleName+"].Its already int the bundle list");
+            return;
+        }
+
+        if (string.IsNullOrEmpty(parent) && m_Selections.Count == 1)
+        {
+            parent = m_Selections[0];
+        }
+        var bundleType = path.EndsWith(".unity") ? BundleType.Scene : BundleType.Normal;
+        bool created = BundleManager.CreateNewBundle(currentBundleName, parent, bundleType);
+        if (created)
+        {
+            if(BundleManager.CanAddPathToBundle(path,currentBundleName))
+                BundleManager.AddPathToBundle(path,currentBundleName);
+
+            if(IsFold(parent))
+                SetFold(parent,false);
+
+            m_Selections.Clear();
+            m_Selections.Add(currentBundleName);
+        }
+    }
+
+    void BuildAll()
 	{
 		BuildHelper.BuildAll();
 		BuildHelper.ExportBMDatasToOutput();
@@ -659,20 +763,12 @@ internal class BundleTreeWin : EditorWindow
 	
 	void BuildSelection()
 	{	
-		BuildHelper.BuildBundles(m_Selections.ToArray());
-		BuildHelper.ExportBMDatasToOutput();
+		BuildHelper.BuildSelections(m_Selections.ToArray());
 	}
 	
 	void RebuildSelection()
 	{
-		foreach(string bundleName in m_Selections)
-		{
-			BundleBuildState buildState = BundleManager.GetBuildStateOfBundle(bundleName);
-			buildState.lastBuildDependencies = null;
-		}
-		
-		BuildHelper.BuildBundles(m_Selections.ToArray());
-		BuildHelper.ExportBMDatasToOutput();
+		BuildHelper.RebuildSelection(m_Selections.ToArray());
 	}
 	
 	bool OnCanRecieve(GUIDragHandler.DragDatas recieverData, GUIDragHandler.DragDatas dragData)

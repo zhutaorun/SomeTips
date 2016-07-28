@@ -1,9 +1,12 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using LitJson;
+using UnityEngine;
 using System.Collections;
 using System.Text.RegularExpressions;
 
 public class BMUtility
 {
+    public const int InheritPriorityValue = 6; 
 	public static void Swap<T>(ref T a, ref T b)
 	{
 		T temp = a;
@@ -55,4 +58,51 @@ public class BMUtility
 			return "";
 		}
 	}
+
+    public static bool IsPersistentDataExists(string fileName)
+    {
+        var path = System.IO.Path.Combine(Application.persistentDataPath, fileName);
+        return File.Exists(path);
+    }
+
+    public static T LoadFromPersistentData<T>(string fileName)
+    {
+        var path = System.IO.Path.Combine(Application.persistentDataPath,fileName);
+        if (File.Exists(path))
+        {
+            var reader = new StreamReader(path);
+            if (reader != null)
+            {
+                var obj = JsonMapper.ToObject<T>(reader);
+                reader.Close();
+                return obj;
+            }
+            else
+            {
+                reader.Close();
+                return default(T);
+            }
+        }
+        else
+        {
+            return default(T);
+        }
+    }
+
+    public static void SaveToPersistentData<T>(T data, string fileName)
+    {
+        var path = System.IO.Path.Combine(Application.persistentDataPath, fileName);
+
+        var tw = new StreamWriter(path);
+        if (tw == null)
+        {
+            Debug.LogError("Cannot write to"+path);
+            return;
+        }
+
+        string jsonStr = JsonFormatter.PrettyPrint(JsonMapper.ToJson(data));
+        tw.WriteLine(jsonStr);
+        tw.Flush();
+        tw.Close();
+    }
 }

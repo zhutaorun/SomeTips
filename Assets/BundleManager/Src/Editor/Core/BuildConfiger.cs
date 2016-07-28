@@ -120,7 +120,8 @@ public class BuildConfiger
 		get
 		{
 			if(BuildConfiger.UseEditorTarget)
-				BuildConfiger.UnityBuildTarget = EditorUserBuildSettings.activeBuildTarget;
+                return EditorUserBuildSettings.activeBuildTarget;
+				//BuildConfiger.UnityBuildTarget = EditorUserBuildSettings.activeBuildTarget;
 
 			switch(BundleBuildTarget)
 			{
@@ -144,38 +145,44 @@ public class BuildConfiger
 				return BuildTarget.StandaloneWindows;
 			}
 		}
-		set
-		{
-			switch(value)
-			{
-			case BuildTarget.StandaloneGLESEmu:
-			case BuildTarget.StandaloneLinux:
-			case BuildTarget.StandaloneLinux64:
-			case BuildTarget.StandaloneLinuxUniversal:
-			case BuildTarget.StandaloneOSXIntel:
-			case BuildTarget.StandaloneWindows:
-			case BuildTarget.StandaloneWindows64:
-				BundleBuildTarget = BuildPlatform.Standalones;
-				break;
-			case BuildTarget.WebPlayer:
-			case BuildTarget.WebPlayerStreamed:
-				BundleBuildTarget = BuildPlatform.WebPlayer;
-				break;
+	}
+
+    public static BuildPlatform AutoBundleBuildtarget
+    {
+        get
+        {
+            switch (UnityBuildTarget)
+            {
+                case BuildTarget.StandaloneGLESEmu:
+                case BuildTarget.StandaloneLinux:
+                case BuildTarget.StandaloneLinux64:
+                case BuildTarget.StandaloneLinuxUniversal:
+                case BuildTarget.StandaloneOSXIntel:
+                case BuildTarget.StandaloneWindows:
+                case BuildTarget.StandaloneWindows64:
+                    return BuildPlatform.Standalones;
+                    break;
+                case BuildTarget.WebPlayer:
+                case BuildTarget.WebPlayerStreamed:
+                    return BuildPlatform.WebPlayer;
+                    break;
 #if UNITY_5
 			case BuildTarget.iOS:
 #else
-			case BuildTarget.iPhone:
+                case BuildTarget.iPhone:
 #endif
-				BundleBuildTarget = BuildPlatform.IOS;
-				break;
-			case BuildTarget.Android:
-				BundleBuildTarget = BuildPlatform.Android;
-				break;
-			default:
-				Debug.LogError("Internal error. Bundle Manager dosn't support for platform " + value);
-				BundleBuildTarget = BuildPlatform.Standalones;
-				break;
-			}
-		}
-	}
+                    return BuildPlatform.IOS;
+                    break;
+                case BuildTarget.Android:
+                    return BuildPlatform.Android;
+                    break;
+                default:
+                    Debug.LogError("Internal error. Bundle Manager dosn't support for platform " + UnityBuildTarget);
+                    return BuildPlatform.Standalones;
+                    break;
+            }
+        }
+
+    }
+
 }

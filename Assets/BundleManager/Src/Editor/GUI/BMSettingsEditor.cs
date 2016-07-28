@@ -60,8 +60,8 @@ internal class BMSettingsEditor : Editor
 			{
 				BuildConfiger.UseEditorTarget = EditorGUILayout.Toggle("Use Editor Target", BuildConfiger.UseEditorTarget);
 				
-				if(BuildConfiger.UseEditorTarget)
-					BuildConfiger.UnityBuildTarget = EditorUserBuildSettings.activeBuildTarget;
+                //if(BuildConfiger.UseEditorTarget)
+                //    BuildConfiger.UnityBuildTarget = EditorUserBuildSettings.activeBuildTarget;
 				
 				BuildPlatform origPlatform = BuildConfiger.BundleBuildTarget;
 				GUI.enabled = !BuildConfiger.UseEditorTarget;

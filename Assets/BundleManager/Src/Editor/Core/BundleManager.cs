@@ -1,3 +1,4 @@
+using System.Reflection;
 using UnityEngine;
 using UnityEditor;
 using System;
@@ -112,7 +113,7 @@ public class BundleManager
 		BundleData childeBundle = bundleDict[childe];
 		
 		if(bundleDict.ContainsKey(childeBundle.parent))
-			bundleDict[childeBundle.parent].children.Remove(childe);
+			bundleDict[childeBundle.parent].GetChildren().Remove(childe);
 				
 		string origParent = childeBundle.parent;
 		childeBundle.parent = parent;
@@ -120,8 +121,8 @@ public class BundleManager
 		if(parent != "")
 		{
 			BundleData newParentBundle = bundleDict[parent];
-			newParentBundle.children.Add(childe);
-			newParentBundle.children.Sort();
+			newParentBundle.GetChildren().Add(childe);
+			newParentBundle.GetChildren().Sort();
 		}
 		
 		if(parent == "" || origParent == "")
@@ -140,7 +141,7 @@ public class BundleManager
 	 * @param parent New parent's name. Set the parent to empty string if you want create a new root bundle.
 	 * @param sceneBundle Is the bundle a scene bundle?  
 	 */
-	static public bool CreateNewBundle(string name, string parent, bool sceneBundle)
+	static public bool CreateNewBundle(string name, string parent, BundleType bundleType)
 	{
 		var bundleDict = getInstance().bundleDict;
 
@@ -149,14 +150,15 @@ public class BundleManager
 		
 		BundleData newBundle = new BundleData();
 		newBundle.name = name;
-		newBundle.sceneBundle = sceneBundle;
-		
+		//newBundle.sceneBundle = sceneBundle;
+	    newBundle.bundleType = bundleType;
+
 		if(parent != "")
 		{
 			if(!bundleDict.ContainsKey(parent))
 				return false;
 			else
-				bundleDict[parent].children.Add(name);
+				bundleDict[parent].GetChildren().Add(name);
 			
 			newBundle.parent = parent;
 		}
@@ -186,6 +188,7 @@ public class BundleManager
 		var bundlelist = BMDataAccessor.Bundles;
 		var dependRefDict = getInstance().dependRefDict;
 		var includeRefDict = getInstance().includeRefDict;
+	    var statesDict = getInstance().statesDict;
 		
 		if(!bundleDict.ContainsKey(name))
 			return false;
@@ -201,7 +204,7 @@ public class BundleManager
 		// Remove parent ref
 		if(bundle.parent != "" && bundleDict.ContainsKey(bundle.parent))
 		{
-			bundleDict[bundle.parent].children.Remove(name);
+			bundleDict[bundle.parent].GetChildren().Remove(name);
 		}
 		
 		// Remove include ref
@@ -212,19 +215,20 @@ public class BundleManager
 		}
 		
 		// Remove depend asssets ref
-		foreach(string guid in bundle.dependGUIDs)
+		foreach(string guid in bundle.GetExtraData().dependGUIDs)
 		{
 			dependRefDict[guid].Remove(bundle);
 		}
 		
 		// Delete children recursively
-		foreach(string childName in bundle.children)
+		foreach(string childName in bundle.GetChildren())
 		{
 			RemoveBundle(childName);
 		}
 		
-		BMDataAccessor.SaveBundleData();
-		BMDataAccessor.SaveBundleBuildeStates();
+		//Remove buildState
+	    if (statesDict.ContainsKey(name)) statesDict.Remove(name);
+
 		return true;
 	}
 	
@@ -266,11 +270,11 @@ public class BundleManager
 		if(bundle.parent != "")
 		{
 			BundleData parentBundle = bundleDict[bundle.parent];
-			parentBundle.children.Remove(origName);
-			parentBundle.children.Add(newName);
+			parentBundle.GetChildren().Remove(origName);
+			parentBundle.GetChildren().Add(newName);
 		}
 		
-		foreach(string childName in bundle.children)
+		foreach(string childName in bundle.GetChildren())
 			getInstance().bundleDict[childName].parent = newName;
 		
 		var buildStatesDic = getInstance().statesDict;
@@ -301,9 +305,9 @@ public class BundleManager
 		if(bundle.includeGUIDs.Contains(guid))
 			return false;
 		
-		if(ContainsFileInPath(path, sceneDetector) && !bundle.sceneBundle)
+		if(ContainsFileInPath(path, sceneDetector) && bundle.bundleType!= BundleType.Scene)
 			return false;
-		else if(ContainsFileInPath(path, assetDetector) && bundle.sceneBundle)
+		else if(ContainsFileInPath(path, assetDetector) && bundle.bundleType ==BundleType.Scene)
 			return false;
 		else
 			return true;
@@ -375,8 +379,44 @@ public class BundleManager
 		
 		return false;
 	}
+    public static bool CheckAssetModified(AssetState state)
+    {
+        AssetState currState = GetAssetState(state.guid);
 
-	/**
+        if (currState.lastModifyTime == state.lastModifyTime) return false;
+        if (currState.fileLength != state.fileLength || currState.metaLength != state.metaLength) return true;
+        if (currState.fileMd5 != state.fileMd5 || currState.metaMd5 != state.metaMd5) return true;
+
+        return false;
+    }
+
+    public static AssetState GetAssetState(string guid)
+    {
+        if (!BMDataAccessor.AssetStates.ContainsKey(guid))
+        {
+            var s = new AssetState();
+            s.guid = guid;
+
+            string filePath = AssetDatabase.GUIDToAssetPath(guid);
+            string metaPath = filePath + ".meta";
+
+            var t1 = File.GetLastAccessTimeUtc(filePath).Ticks;
+            var t2 = File.GetLastAccessTimeUtc(metaPath).Ticks;
+            s.lastModifyTime = Math.Max(t1, t2);
+
+            s.fileLength = new FileInfo(filePath).Length;
+            s.metaLength = new FileInfo(metaPath).Length;
+
+            s.fileMd5 = ZipFile.md5.getMd5HashFromFile(filePath);
+            s.metaMd5 = ZipFile.md5.getMd5HashFromFile(metaPath);
+
+            BMDataAccessor.AssetStates[guid] = s;
+        }
+
+        return BMDataAccessor.AssetStates[guid];
+    }
+
+    /**
 	 * Force refresh references of all bundles
 	 */
 	public static void RefreshAll()
@@ -389,25 +429,54 @@ public class BundleManager
 	 */
 	public static void RefreshBundleDependencies(BundleData bundle)
 	{
-		// Remove the old refs
-		foreach(string guid in bundle.dependGUIDs)
-		{
-			if(getInstance().dependRefDict.ContainsKey(guid))
-				getInstance().dependRefDict[guid].Remove(bundle);
-		}
+        //// Remove the old refs
+        //foreach(string guid in bundle.dependGUIDs)
+        //{
+        //    if(getInstance().dependRefDict.ContainsKey(guid))
+        //        getInstance().dependRefDict[guid].Remove(bundle);
+        //}
 		
-		// Get all the includes files path
-		string[] files = BuildHelper.GetAssetsFromPaths( GUIDsToPaths(bundle.includeGUIDs).ToArray(), bundle.sceneBundle );
-		string[] dependGUIDs = PathsToGUIDs( AssetDatabase.GetDependencies(files) );
+        //// Get all the includes files path
+        //string[] files = BuildHelper.GetAssetsFromPaths( GUIDsToPaths(bundle.includeGUIDs).ToArray(), bundle.sceneBundle );
+        //string[] dependGUIDs = PathsToGUIDs( AssetDatabase.GetDependencies(files) );
 		
-		// New refs
-		bundle.dependGUIDs = new List<string>(dependGUIDs);
-		bundle.dependGUIDs.RemoveAll(x=>bundle.includeGUIDs.Contains(x));
+        //// New refs
+        //bundle.dependGUIDs = new List<string>(dependGUIDs);
+        //bundle.dependGUIDs.RemoveAll(x=>bundle.includeGUIDs.Contains(x));
 		
-		AddDependRefs(bundle);
+        //AddDependRefs(bundle);
+
+	    var extra = bundle.GetExtraData();
+	    foreach (string guid in extra.dependGUIDs)
+	    {
+	        if (getInstance().dependRefDict.ContainsKey(guid))
+	            getInstance().dependRefDict[guid].Remove(bundle);
+	    }
+
+	    extra.includePaths = GUIDsToPaths(bundle.includeGUIDs);
+
+	    string[] files = BuildHelper.GetAssetsFromPaths(extra.includeAssetPaths.ToArray(), bundle.bundleType);
+        extra.includeAssetPaths = new List<string>(files);
+	    extra.includeAssetGUIDs = PathsToGUIDs(extra.includeAssetPaths);
+
+        extra.dependPaths = new List<string>(AssetDatabase.GetDependencies(files));
+	    extra.dependPaths.RemoveAll(path => path.EndsWith(".cs"));
+	    extra.dependPaths.RemoveAll(x => extra.includePaths.Contains(x));
+
+        extra.dependGUIDs = new List<string>(PathsToGUIDs(extra.dependPaths.ToArray()));
+
+        AddDependRefs(bundle);
 	}
-	
-	internal static void UpdateAllBundleChangeTime()
+
+    public static void MarkParentsNeedBuild(BundleData bundle)
+    {
+        var extra = bundle.GetExtraData();
+        extra.needBuild = true;
+        var parentBundle = BundleManager.GetBundleData(bundle.parent);
+        if(parentBundle!=null) MarkParentsNeedBuild(parentBundle);
+    }
+
+    internal static void UpdateAllBundleChangeTime()
 	{
 		foreach(BundleData bundle in bundles)
 			UpdateBundleChangeTime(bundle.name);
@@ -467,7 +536,7 @@ public class BundleManager
 
 	internal static void AddDependRefs(BundleData bundle)
 	{
-		foreach(string guid in bundle.dependGUIDs)
+		foreach(string guid in bundle.GetExtraData().dependGUIDs)
 		{
 			if(!getInstance().dependRefDict.ContainsKey(guid))
 			{
@@ -485,7 +554,7 @@ public class BundleManager
 	internal static void AddIncludeRef(string guid, BundleData bundle)
 	{
 		string path = AssetDatabase.GUIDToAssetPath(guid);
-		foreach(string subPath in BuildHelper.GetAssetsFromPath(path, bundle.sceneBundle))
+		foreach(string subPath in BuildHelper.GetAssetsFromPath(path, bundle.bundleType))
 		{
 			string subGuid = AssetDatabase.AssetPathToGUID(subPath);
 
@@ -504,7 +573,7 @@ public class BundleManager
 	internal static void RemoveIncludeRef(string guid, BundleData bundle)
 	{
 		string path = AssetDatabase.GUIDToAssetPath(guid);
-		foreach(string subPath in BuildHelper.GetAssetsFromPath(path, bundle.sceneBundle))
+		foreach(string subPath in BuildHelper.GetAssetsFromPath(path, bundle.bundleType))
 		{
 			string subGuid = AssetDatabase.AssetPathToGUID(subPath);
 			getInstance().includeRefDict[subGuid].Remove(bundle);
@@ -592,7 +661,8 @@ public class BundleManager
 	
 	private static void UpdateBundleChangeTime(string bundleName)
 	{
-		GetBuildStateOfBundle(bundleName).changeTime = DateTime.Now.ToBinary();
+		//GetBuildStateOfBundle(bundleName).changeTime = DateTime.Now.ToBinary();
+	    GetBuildStateOfBundle(bundleName).changed = true;
 	}
 	
 	private static void InsertBundleToBundleList(BundleData bundle)
@@ -633,13 +703,14 @@ public class BundleManager
 			                            "Welcome to new version. Bundle Manager will upgrade your Bundle Data files to new version.", 
 			                            "OK");
 			BMDataAccessor.BMConfiger.bmVersion = 1;
-			foreach(BundleData bundle in BMDataAccessor.Bundles)
-			{
-				bundle.includeGUIDs = PathsToGUIDs(bundle.includs);
-				bundle.dependGUIDs = PathsToGUIDs(bundle.dependAssets);
-			}
+            //MARK:原生功能中检查Api更新的机制，因为已经改变了数据结构所有现在不用了
+            //foreach(BundleData bundle in BMDataAccessor.Bundles)
+            //{
+            //    bundle.includeGUIDs = PathsToGUIDs(bundle.includs);
+            //    bundle.dependGUIDs = PathsToGUIDs(bundle.dependAssets);
+            //}
 
-			BMDataAccessor.SaveBundleData();
+			BMDataAccessor.ShouldSaveBundleDate = true;
 			BMDataAccessor.SaveBMConfiger();
 		}
 	}
@@ -697,4 +768,6 @@ public class BundleManager
 	private Dictionary<string, BundleBuildState> statesDict = new Dictionary<string, BundleBuildState>();
 	private Dictionary<string, List<BundleData>> dependRefDict = new Dictionary<string, List<BundleData>>();// key: asset path, value: bundles depend this asset
 	private Dictionary<string, List<BundleData>> includeRefDict = new Dictionary<string, List<BundleData>>();// key: asset path, value: bundles include this asset
+
+
 }

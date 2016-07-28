@@ -1,8 +1,10 @@
+using System;
 using UnityEngine;
 using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Object = UnityEngine.Object;
 
 
 // In order to compatiblity with Unity4.0 
@@ -11,10 +13,15 @@ using System.IO;
 // And create two more editor class for asset bundle and scene bundle.
 public static class BundleEditorDrawer
 {
+    private static readonly int[] PriorityList = new[] {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6};
+
+    private static readonly string[] PriorityNameList = new[]{"-5", "-4", "-3", "-2", "-1", "0", "1", "2", "3", "4", "5", "Inherited"};
+
 	public static Editor CurrentBundleEditor = null;
 
 	static SceneBundleInpectorObj sbInspectorObj = null;
 	static AssetBundleInspectorObj abInpsectorObj = null;
+    static TextBundleInspectorObj tbInpsectorObj = null;
 
 	static BundleData currentBundle = null;
 
@@ -44,12 +51,36 @@ public static class BundleEditorDrawer
 			abInpsectorObj.hideFlags = HideFlags.DontSave;
 		}
 
-		if(newBundle != null)
-			Selection.activeObject = newBundle.sceneBundle? (Object)sbInspectorObj : (Object)abInpsectorObj;
-		else
-			Selection.activeObject = null;
-		
-		// Update bundle
+	    if (tbInpsectorObj == null)
+	    {
+	        tbInpsectorObj = ScriptableObject.CreateInstance<TextBundleInspectorObj>();
+	        tbInpsectorObj.hideFlags = HideFlags.DontSave;
+	    }
+
+	    if (newBundle != null)
+	    {
+	        switch (newBundle.bundleType)
+	        {
+	            case BundleType.Normal:
+	                Selection.activeObject = abInpsectorObj;
+                    break;
+                case BundleType.Scene:
+	                Selection.activeObject = sbInspectorObj;
+                    break;
+                case BundleType.Text:
+	                Selection.activeObject = tbInpsectorObj;
+                    break;
+                default:
+	                Selection.activeObject = null;
+	                break;
+	        }
+	    }
+	    else
+	    {
+            Selection.activeObject = null;
+	    }
+
+	    // Update bundle
 		if(newBundle == currentBundle)
 			return;
 		
@@ -82,10 +113,26 @@ public static class BundleEditorDrawer
 			// Bundle type and version
 			BundleBuildState buildStates = BundleManager.GetBuildStateOfBundle(currentBundle.name);
 			EditorGUILayout.BeginHorizontal();
-			{
-				GUILayout.Label(currentBundle.sceneBundle ? "Scene bundle" : "Asset bundle", BMGUIStyles.GetStyle("BoldLabel"));
+		    {
+		        string label = "";
+		        switch (currentBundle.bundleType)
+		        {
+		            case BundleType.Normal:
+		                label = "Asset bundle";
+                        break;
+                    case BundleType.Scene:
+		                label = "Scene bundle";
+                        break;
+                    case BundleType.Text:
+		                label = "Text bundle";
+                        break;
+                    default:
+		                throw new System.NotImplementedException();
+		        }
+
+                GUILayout.Label(label, BMGUIStyles.GetStyle("BoldLabel"));
 				GUILayout.FlexibleSpace();
-				GUILayout.Label("Version " + buildStates.version, BMGUIStyles.GetStyle("BoldLabel"));
+				//GUILayout.Label("Version " + buildStates.version, BMGUIStyles.GetStyle("BoldLabel"));
 			}
 			EditorGUILayout.EndHorizontal();
 			
@@ -95,7 +142,9 @@ public static class BundleEditorDrawer
 				GUILayout.Label(sizeStr, BMGUIStyles.GetStyle("BoldLabel"));
 				GUILayout.FlexibleSpace();
 				GUILayout.Label("Priority", EditorStyles.boldLabel);
-				currentBundle.priority = EditorGUILayout.Popup(currentBundle.priority, new string[]{"0","1","2","3","4","5","6","7","8","9"}, GUILayout.MaxWidth(40));
+			    var priorityIndex = currentBundle.priority + 5;
+                priorityIndex = EditorGUILayout.Popup(priorityIndex, PriorityNameList, GUILayout.MaxWidth(70));
+                currentBundle.priority = priorityIndex;
 			}
 			GUILayout.EndHorizontal();
 			
@@ -192,7 +241,16 @@ public static class BundleEditorDrawer
 	
 	static void GUI_DependencyList()
 	{
-		if(currentBundle.dependGUIDs.Count > 0)
+	    var extra = currentBundle.GetExtraData();
+
+	    if (!BMDataAccessor.DependencyUpdated)
+	    {
+            GUILayout.Label("DEPEND",BMGUIStyles.GetStyle("UnfoldableTitle"));
+            EditorGUILayout.HelpBox("Need Update Dependencies",MessageType.Info);
+            return;
+	    }
+
+	    if(extra.dependGUIDs.Count > 0)
 		{
 #if !(UNITY_4_2 || UNITY_4_1 || UNITY_4_0)
 			m_FoldoutMetaFiles = EditorGUILayout.Foldout(m_FoldoutMetaFiles, "DEPEND", BMGUIStyles.GetStyle("CFoldout"));
@@ -210,7 +268,7 @@ public static class BundleEditorDrawer
 		{
 			EditorGUILayout.BeginVertical();
 			{
-				foreach(string guid in currentBundle.dependGUIDs)
+                foreach (string guid in extra.dependGUIDs)
 				{
 					string assetPath = AssetDatabase.GUIDToAssetPath(guid);
 					bool isCurrentPathSelect = m_CurSelectAsset == guid && m_IsMetaListSelect;

@@ -34,8 +34,52 @@ internal class BMDataAccessor
 			return m_BuildStates;
 		}
 	}
-	
-	static public BMConfiger BMConfiger
+
+    public static int BuildVersion
+    {
+        get
+        {
+            if (m_BuildVersion < 0)
+            {
+                if (File.Exists(BundleBuildVersionPath))
+                {
+                    var lines = File.ReadAllLines(BundleBuildVersionPath);
+                    if (lines.Length > 0) int.TryParse(lines[0], out m_BuildVersion);
+                }
+                if (m_BuildVersion < 0)
+                {
+                    m_BuildVersion = 0;
+                }
+            }
+            return m_BuildVersion;
+        }
+        set
+        {
+            m_BuildVersion = value;
+        }
+    }
+
+    public static Dictionary<string, AssetState> AssetStates
+    {
+        get
+        {
+            if(m_AssetStates==null)
+                m_AssetStates = new Dictionary<string, AssetState>();
+            return m_AssetStates;
+        }
+    }
+
+    public static Dictionary<string, BundleExtraData> BundleExtraDatas
+    {
+        get
+        {
+            if(m_BundleExtraDatas==null)
+                m_BundleExtraDatas = new Dictionary<string, BundleExtraData>();
+            return m_BundleExtraDatas;
+        }
+    }
+
+    static public BMConfiger BMConfiger
 	{
 		get
 		{
@@ -63,6 +107,10 @@ internal class BMDataAccessor
 		}
 	}
 
+    public static bool DependencyUpdated = false;
+    public static bool ShouldSaveBundleDate = false;
+    public static bool ShouldSaveBundleStates = false;
+
 	static public void Refresh()
 	{
 		m_Bundles = null;
@@ -81,12 +129,9 @@ internal class BMDataAccessor
 		foreach(BundleData bundle in Bundles)
 		{
 			bundle.includeGUIDs.Sort(guidComp);
-			bundle.includs = BundleManager.GUIDsToPaths(bundle.includeGUIDs);
-
-			bundle.dependGUIDs.Sort(guidComp);
-			bundle.dependAssets = BundleManager.GUIDsToPaths(bundle.dependGUIDs);
 		}
 		saveObjectToJsonFile(Bundles, BundleDataPath);
+        Debug.LogError("BuildleData Saved.");
 	}
 	
 	static public void SaveBundleBuildeStates()
@@ -152,11 +197,20 @@ internal class BMDataAccessor
 	
 	static private List<BundleData> m_Bundles = null;
 	static private List<BundleBuildState> m_BuildStates = null;
+    private static int m_BuildVersion = -1;
+    private static Dictionary<string, AssetState> m_AssetStates = null;
+    private static Dictionary<string, BundleExtraData> m_BundleExtraDatas = null;
 	static private BMConfiger m_BMConfier = null;
 	static private BMUrls m_Urls = null;
 		
 	public const string BundleDataPath = "Assets/BundleManager/BundleData.txt";
 	public const string BMConfigerPath = "Assets/BundleManager/BMConfiger.txt";
-	public const string BundleBuildStatePath = "Assets/BundleManager/BuildStates.txt";
 	public const string UrlDataPath = "Assets/BundleManager/Resources/Urls.txt";
+
+
+    public static string BundleBuildStatePath { get { return string.Format(_BundleBuildStatePath_Format,BuildConfiger.AutoBundleBuildtarget);}}
+    public const string _BundleBuildStatePath_Format = "Assets/BundleManager/Editor/BuildState_{0}.txt";
+
+    public static string BundleBuildVersionPath {get { return string.Format(BundleBuildVersionPath_Format, BuildConfiger.AutoBundleBuildtarget); }}
+    public const string BundleBuildVersionPath_Format = "Assets/BundleManager/Editor/BMDateVersion_{0}.txt";
 }

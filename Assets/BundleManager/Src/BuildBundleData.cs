@@ -3,60 +3,32 @@ using System.Collections;
 using System.Collections.Generic;
 using LitJson;
 
-/**
- * All informations of a bundle
- * Use the BundleManager APIs to change the bundle content, don't change the members of this class directly.
- */ 
-public class BundleData
+
+public enum BundleType
 {
-	/**
-	 * Name of the bundle. The name should be uniqle in all bundles
-	 */ 
-	public string		name = "";
-	
-	/**
-	 * List of paths included. The path can be directories.
-	 */ 
-	public List<string>	includs = new List<string>();
-
-	/**
-	 * List of paths currently depended. One asset can be depended but not included in the Includes list
-	 */ 
-	public List<string> dependAssets = new List<string>();
-
-	public List<string> includeGUIDs = new List<string>();
-
-	public List<string> dependGUIDs = new List<string>();
-	
-	/**
-	 * Is this bundle a scene bundle?
-	 */ 
-	public bool			sceneBundle = false;
-
-	/**
-	 * Default download priority of this bundle.
-	 */ 
-	public int			priority = 0;
-	
-	/**
-	 * Parent name of this bundle.
-	 */ 
-	public string		parent = "";
-	
-	/**
-	 * Childrens' name of this bundle
-	 */ 
-	public List<string>	children = new List<string>();
+    Normal,
+    Scene,
+    Text,
 }
 
-public class BundleBuildState
+public class BundleVersionInfo
 {
-	public string		bundleName = "";
-	public int			version = -1;
-	public uint			crc = 0;
-	public long			size = -1;
-	public long			changeTime = -1;
-	public string[]		lastBuildDependencies = null;
+    public string name = "";
+    public string requestString = "";
+    public string parent = "";
+    public uint crc = 0;
+    public long size = -1;
+    public int priority;
+}
+
+public class BundleDownloadInfo
+{
+    public string name = "";
+    public string url = "";
+    public int version = 0;
+    public bool localBundle = false;
+    public bool needDownload = true;
+    public BundleVersionInfo versionInfo;
 }
 
 public class BMConfiger
