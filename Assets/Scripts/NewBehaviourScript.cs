@@ -5,6 +5,8 @@ public class NewBehaviourScript : MonoBehaviour {
 
 	public string name = "朱涛RUN";
 
+   
+
 #if UNITY_EDITOR
 	void Reset()
 	{
