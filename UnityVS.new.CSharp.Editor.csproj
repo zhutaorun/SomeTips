@@ -28,7 +28,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DefineConstants>DEBUG;TRACE;UNITY_4_6_3;UNITY_4_6;UNITY_STANDALONE_WIN;ENABLE_MICROPHONE;ENABLE_TEXTUREID_MAP;ENABLE_UNITYEVENTS;ENABLE_NEW_HIERARCHY ;ENABLE_AUDIO_FMOD;UNITY_STANDALONE;ENABLE_TERRAIN;ENABLE_SUBSTANCE;ENABLE_GENERICS;INCLUDE_IL2CPP;INCLUDE_WP8SUPPORT;ENABLE_MOVIES;ENABLE_WWW;ENABLE_IMAGEEFFECTS;ENABLE_4_6_FEATURES;INCLUDE_WP_BLUE_SUPPORT;ENABLE_WEBCAM;INCLUDE_METROSUPPORT;RENDER_SOFTWARE_CURSOR;ENABLE_NETWORK;ENABLE_PHYSICS;UNITY5_SCRIPTING_IN_UNITY4;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_2D_PHYSICS;ENABLE_SHADOWS;ENABLE_AUDIO;ENABLE_NAVMESH_CARVING;ENABLE_DUCK_TYPING;ENABLE_SINGLE_INSTANCE_BUILD_SETTING;ENABLE_MONO;ENABLE_PROFILER;UNITY_EDITOR;UNITY_EDITOR_WIN;UNITY_TEAM_LICENSE;UNITY_PRO_LICENSE</DefineConstants>
-    <IntermediateOutputPath>C:\Users\ADMINI~1\AppData\Local\Temp\vsF5DD.tmp\Debug\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -37,7 +36,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DefineConstants>TRACE;UNITY_4_6_3;UNITY_4_6;UNITY_STANDALONE_WIN;ENABLE_MICROPHONE;ENABLE_TEXTUREID_MAP;ENABLE_UNITYEVENTS;ENABLE_NEW_HIERARCHY ;ENABLE_AUDIO_FMOD;UNITY_STANDALONE;ENABLE_TERRAIN;ENABLE_SUBSTANCE;ENABLE_GENERICS;INCLUDE_IL2CPP;INCLUDE_WP8SUPPORT;ENABLE_MOVIES;ENABLE_WWW;ENABLE_IMAGEEFFECTS;ENABLE_4_6_FEATURES;INCLUDE_WP_BLUE_SUPPORT;ENABLE_WEBCAM;INCLUDE_METROSUPPORT;RENDER_SOFTWARE_CURSOR;ENABLE_NETWORK;ENABLE_PHYSICS;UNITY5_SCRIPTING_IN_UNITY4;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_2D_PHYSICS;ENABLE_SHADOWS;ENABLE_AUDIO;ENABLE_NAVMESH_CARVING;ENABLE_DUCK_TYPING;ENABLE_SINGLE_INSTANCE_BUILD_SETTING;ENABLE_MONO;ENABLE_PROFILER;UNITY_EDITOR;UNITY_EDITOR_WIN;UNITY_TEAM_LICENSE;UNITY_PRO_LICENSE</DefineConstants>
-    <IntermediateOutputPath>C:\Users\ADMINI~1\AppData\Local\Temp\vsF5DD.tmp\Release\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -104,7 +102,8 @@
     <Compile Include="Assets\BundleManager\Src\Editor\GUI\InspectorDummy\SceneBundleInpectorObj.cs" />
     <Compile Include="Assets\BundleManager\Src\Editor\GUI\InspectorDummy\TextBundleEditor.cs" />
     <Compile Include="Assets\BundleManager\Src\Editor\GUI\InspectorDummy\TextBundleInspectorObj.cs" />
-    <Compile Include="Assets\Editor\BundleManager.cs" />
+    <Compile Include="Assets\Editor\BuildAssetBundleInOneClickWindow.cs" />
+    <Compile Include="Assets\Editor\EditorCNStyles.cs" />
     <Compile Include="Assets\Editor\EvnEvn.cs" />
     <Compile Include="Assets\Editor\Files.cs" />
     <Compile Include="Assets\Editor\FilesGet.cs" />
@@ -196,9 +195,16 @@
     <Compile Include="Assets\NGUI\Scripts\Editor\UIWrapContentEditor.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\BundleManager\Editor\AssetBundlePlaceholder.txt" />
     <None Include="Assets\BundleManager\Editor\BMConfiger.txt" />
-    <None Include="Assets\BundleManager\Editor\BuildStates.txt" />
+    <None Include="Assets\BundleManager\Editor\BMDataVersion_Android.txt" />
+    <None Include="Assets\BundleManager\Editor\BMDataVersion_IOS.txt" />
+    <None Include="Assets\BundleManager\Editor\BMDataVersion_Standalones.txt" />
+    <None Include="Assets\BundleManager\Editor\BuildStates_Android.txt" />
+    <None Include="Assets\BundleManager\Editor\BuildStates_IOS.txt" />
+    <None Include="Assets\BundleManager\Editor\BuildStates_Standalones.txt" />
     <None Include="Assets\BundleManager\Editor\BundleData.txt" />
+    <None Include="Assets\BundleManager\Editor\BundleVersionInfo.txt" />
     <None Include="Assets\BundleManager\Resources\Urls.txt" />
     <None Include="Assets\Calculation.txt" />
     <None Include="Assets\NGUI\Examples\Atlases\Fantasy\Fantasy Font - Normal.txt" />

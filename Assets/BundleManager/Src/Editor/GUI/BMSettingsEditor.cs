@@ -31,6 +31,7 @@ internal class BMSettingsEditor : Editor
 
 	public override void OnInspectorGUI()
 	{
+	    bool _refreshAll = false;
 		EditorGUILayout.BeginVertical();
 		{
 			BuildConfiger.Compress = EditorGUILayout.Toggle("Compress", BuildConfiger.Compress);
@@ -44,10 +45,10 @@ internal class BMSettingsEditor : Editor
 			if(!DownloadConfiger.useCache)
 			{
 				DownloadConfiger.useCRC = false;
-				DownloadConfiger.offlineCache = false;
+				//DownloadConfiger.offlineCache = false;
 			}
 
-			DownloadConfiger.offlineCache = EditorGUILayout.Toggle("Offline Cache", DownloadConfiger.offlineCache);
+			//DownloadConfiger.offlineCache = EditorGUILayout.Toggle("Offline Cache", DownloadConfiger.offlineCache);
 			DownloadConfiger.useCRC = EditorGUILayout.Toggle("CRC Check", DownloadConfiger.useCRC);
 
 			GUI.enabled = true;
@@ -72,7 +73,8 @@ internal class BMSettingsEditor : Editor
 				{
 					GUIUtility.keyboardControl = 0; // Remove the focuse on path text field
 					BuildConfiger.BundleBuildTarget = newPlatform;
-					PlayerPrefs.SetInt("BundleManagerPlatform", (int)newPlatform);
+				    _refreshAll = true;
+				    //PlayerPrefs.SetInt("BundleManagerPlatform", (int)newPlatform);
 				}
 				
 				
@@ -89,14 +91,17 @@ internal class BMSettingsEditor : Editor
 					}
 				}EditorGUILayout.EndHorizontal();
 				
+                //*ADD
+			    BuildConfiger.CopyFolderStr = EditorGUILayout.TagField("Copy Folder",BuildConfiger.CopyFolderStr);
+
 				if(!DownloadConfiger.downloadFromOutput)
 					DownloadConfiger.downloadUrl = EditorGUILayout.TextField("Download Url", DownloadConfiger.downloadUrl);
 				
 				DownloadConfiger.downloadFromOutput = EditorGUILayout.Toggle("Download from Output", DownloadConfiger.downloadFromOutput);
 			}EditorGUILayout.EndVertical();
 			
-			if( GUILayout.Button("Export Config File To Output") )
-				BuildHelper.ExportBMDatasToOutput();
+			if( GUILayout.Button("Clean Asset Bundle Caches") )
+				DownloadManager.CleanCache();
 			
 			GUILayout.FlexibleSpace();
 		}EditorGUILayout.EndVertical();
@@ -106,5 +111,10 @@ internal class BMSettingsEditor : Editor
 			BMDataAccessor.SaveBMConfiger();
 			BMDataAccessor.SaveUrls();
 		}
+	    if (_refreshAll)
+	    {
+	        _refreshAll = false;
+            BundleManager.RefreshAll();
+	    }
 	}
 }

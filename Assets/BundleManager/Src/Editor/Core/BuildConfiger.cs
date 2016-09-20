@@ -98,8 +98,27 @@ public class BuildConfiger
 				BMDataAccessor.SaveUrls();
 		}
 	}
-	 
-	internal static string InterpretedOutputPath
+	
+
+    /*
+     * Additional copy to folder feature,folder path string for target platform
+     */
+
+    public static string CopyFolderStr
+    {
+        get { return BMDataAccessor.Urls.copyFolders[AutoBundleBuildtarget.ToString()]; }
+        set
+        {
+            var urls = BMDataAccessor.Urls.copyFolders;
+            string platformStr = AutoBundleBuildtarget.ToString();
+            string origValue = urls[platformStr];
+            urls[platformStr] = value;
+            if(origValue!=value)
+                BMDataAccessor.SaveUrls();
+        }
+    }
+
+    internal static string InterpretedOutputPath
 	{
 		get
 		{

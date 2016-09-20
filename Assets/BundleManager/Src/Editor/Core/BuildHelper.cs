@@ -31,63 +31,25 @@ public class BuildHelper
     /**
 	 * Copy the configeration files to target directory.
 	 */ 
-	public static void ExportBMDatasToOutput()
-	{
-		string exportPath = BuildConfiger.InterpretedOutputPath;
-		if(!Directory.Exists(exportPath))
-			Directory.CreateDirectory(exportPath);
+    //public static void ExportBMDatasToOutput()
+    //{
+    //    string exportPath = BuildConfiger.InterpretedOutputPath;
+    //    if(!Directory.Exists(exportPath))
+    //        Directory.CreateDirectory(exportPath);
 
-		uint crc = 0;
-		if(!BuildAssetBundle(new string[]{BMDataAccessor.BundleDataPath, BMDataAccessor.BundleBuildStatePath, BMDataAccessor.BMConfigerPath}, Path.Combine( exportPath, "BM.data" ), out crc))
-			Debug.LogError("Failed to build bundle of config files.");
+    //    uint crc = 0;
+    //    if(!BuildAssetBundle(new string[]{BMDataAccessor.BundleDataPath, BMDataAccessor.BundleBuildStatePath, BMDataAccessor.BMConfigerPath}, Path.Combine( exportPath, "BM.data" ), out crc))
+    //        Debug.LogError("Failed to build bundle of config files.");
 
-		BuildHelper.ExportBundleDataFileToOutput();
-		BuildHelper.ExportBundleBuildDataFileToOutput();
-		BuildHelper.ExportBMConfigerFileToOutput();
-	}
+    //    BuildHelper.ExportBundleDataFileToOutput();
+    //    BuildHelper.ExportBundleBuildDataFileToOutput();
+    //    BuildHelper.ExportBMConfigerFileToOutput();
+    //}
 
 	/**
 	 * Copy the bundle datas to target directory.
 	 */ 
-	public static void ExportBundleDataFileToOutput()
-	{
-		string exportPath = BuildConfiger.InterpretedOutputPath;
-		if(!Directory.Exists(exportPath))
-			Directory.CreateDirectory(exportPath);
-
-		File.Copy( 	BMDataAccessor.BundleDataPath, 
-		          	Path.Combine( exportPath, Path.GetFileName(BMDataAccessor.BundleDataPath) ), 
-					true );
-	}
 	
-	/**
-	 * Copy the bundle build states to target directory.
-	 */ 
-	public static void ExportBundleBuildDataFileToOutput()
-	{
-		string exportPath = BuildConfiger.InterpretedOutputPath;
-		if(!Directory.Exists(exportPath))
-			Directory.CreateDirectory(exportPath);
-
-		File.Copy( 	BMDataAccessor.BundleBuildStatePath, 
-		          	Path.Combine( exportPath, Path.GetFileName(BMDataAccessor.BundleBuildStatePath) ), 
-					true );
-	}
-	
-	/**
-	 * Copy the bundle manager configeration file to target directory.
-	 */ 
-	public static void ExportBMConfigerFileToOutput()
-	{
-		string exportPath = BuildConfiger.InterpretedOutputPath;
-		if(!Directory.Exists(exportPath))
-			Directory.CreateDirectory(exportPath);
-
-		File.Copy( 	BMDataAccessor.BMConfigerPath, 
-		          	Path.Combine( exportPath, Path.GetFileName(BMDataAccessor.BMConfigerPath) ), 
-					true );
-	}
-
     public static void BuildSelections(string[] selections)
     {
         BMDataAccessor.AssetStates.Clear();
@@ -129,7 +91,7 @@ public class BuildHelper
 	 */
 	public static void RebuildAll()
 	{
-	    foreach (var  bundle in BundleManager.bundles)
+	    foreach (var  bundle in BMDataAccessor.Bundles)
 	    {
             BundleManager.RefreshBundleDependencies(bundle);
 	        BundleManager.GetBuildStateOfBundle(bundle.name).changed = true;
@@ -152,16 +114,66 @@ public class BuildHelper
 		Dictionary<string, List<string>> buildingRoutes = new Dictionary<string, List<string>>();
 		foreach(string bundle in bundles)
 			AddBundleToBuildList(bundle, ref buildingRoutes);
-		
+	    m_BuiltCount = 0;
+	    var startTime = Time.realtimeSinceStartup;
 		foreach(var buildRoute in buildingRoutes)
 		{
 			BundleData bundle = BundleManager.GetBundleData( buildRoute.Key );
 			if(bundle != null)
 				BuildBundleTree(bundle, buildRoute.Value);
 		}
+
+	    BMDataAccessor.BuildVersion++;
+        BMDataAccessor.SaveBundleBuildVersion();
+        BMDataAccessor.SaveBundleVersionInfo();
+
+	    string exportpath = BuildConfiger.InterpretedOutputPath;
+	    if (!Directory.Exists(exportpath))
+	        Directory.CreateDirectory(exportpath);
+
+        BundleManager.UpdateAllBundlesNeedBuild();
+
+	    uint crc = 0;
+	    if (!BuildAssetBundle(new string[] {BMDataAccessor.BundleBuildVersionPath, BMDataAccessor.BMConfigerPath},Path.Combine(exportpath, "BM.data"), out crc))
+            //存入数据，三个path指向三个txt文件，将三个txt文件导入BM.data
+            Debug.LogError("Failed to build bundle of config files.");
+        Debug.Log("Build bundles:"+m_BuiltCount+"| AssetBundleVersion:" + BMDataAccessor.BuildVersion+"| Time Consumed"+(Time.realtimeSinceStartup- startTime));
+
+        File.WriteAllText(Path.Combine(exportpath,"BMDataVersion.txt"),BMDataAccessor.BuildVersion.ToString());
+
 	}
-	
-	internal static void AddBundleToBuildList(string bundleName, ref Dictionary<string, List<string>> buildingRoutes)	
+
+
+    public static void CopyFiles(string srcFolder, string destFolder)
+    {
+        var title = "Copy Asset Bundles";
+        EditorUtility.DisplayProgressBar(title,"Starting...",0);
+        CreateFoldersRecursivly(srcFolder, destFolder);
+        var files = Directory.GetFiles(srcFolder, "*.*", SearchOption.AllDirectories);
+        for (int i = 0; i < files.Length; i++)
+        {
+            var filePath = files[i];
+            var destPath = filePath.Replace(srcFolder, destFolder);
+
+            var progress = (i + 1)/(float) filePath.Length;
+            EditorUtility.DisplayProgressBar(title,"Copying "+ filePath.Replace(srcFolder,"").Substring(1),progress);
+            File.Copy(filePath,destPath);
+        }
+        EditorUtility.ClearProgressBar();
+    }
+
+
+    private static Void CreateFoldersRecursivly(string srcFolder, string destFolder)
+    {
+        if (!Directory.Exists(destFolder)) Directory.CreateDirectory(destFolder);
+        foreach (var subFolder in Directory.GetDirectories(srcFolder))
+        {
+            var destPath = subFolder.Replace(srcFolder, destFolder);
+            CreateFoldersRecursivly(subFolder,destPath);
+        }
+    }
+
+    internal static void AddBundleToBuildList(string bundleName, ref Dictionary<string, List<string>> buildingRoutes)	
 	{
 		BundleData bundle = BundleManager.GetBundleData(bundleName);
 	    var state = BundleManager.GetBuildStateOfBundle(bundleName);
@@ -205,41 +217,43 @@ public class BuildHelper
 		}
 		else
 		{
+		    var buildState = BundleManager.GetBuildStateOfBundle(bundle.name);
 			Debug.Log(bundle.name + " build succeed.");
 		}
-		
-		foreach(string childName in bundle.GetChildren())
-		{
-			BundleData child = BundleManager.GetBundleData(childName);
-			if(child == null)
-			{
-				Debug.LogError("Cannnot find bundle [" + childName + "]. Sth wrong with the bundle config data.");
-				BuildPipeline.PopAssetDependencies();
-				return false;
-			}
-			
-			bool isDependingBundle = false;
-			foreach(string requiredBundle in requiredBuildList)
-			{
-				if(BundleManager.IsBundleDependOn(requiredBundle, childName))
-				{
-					isDependingBundle = true;
-					break;
-				}
-			}
-			
-			if(isDependingBundle || !BuildConfiger.DeterministicBundle)
-			{
-				succ = BuildBundleTree(child, requiredBuildList);
-				if(!succ)
-				{
-					BuildPipeline.PopAssetDependencies();
-					return false;
-				}
-			}
-		}
-		
-		BuildPipeline.PopAssetDependencies();
+	    if (succ)
+	    {
+	        foreach (string childName in bundle.GetChildren())
+	        {
+	            BundleData child = BundleManager.GetBundleData(childName);
+	            if (child == null)
+	            {
+	                Debug.LogError("Cannnot find bundle [" + childName + "]. Sth wrong with the bundle config data.");
+	                BuildPipeline.PopAssetDependencies();
+	                return false;
+	            }
+
+	            bool isDependingBundle = false;
+	            foreach (string requiredBundle in requiredBuildList)
+	            {
+	                if (BundleManager.IsBundleDependOn(requiredBundle, childName))
+	                {
+	                    isDependingBundle = true;
+	                    break;
+	                }
+	            }
+
+	            if (isDependingBundle || !BuildConfiger.DeterministicBundle)
+	            {
+	                succ = BuildBundleTree(child, requiredBuildList);
+	                if (!succ)
+	                {
+	                    BuildPipeline.PopAssetDependencies();
+	                    return false;
+	                }
+	            }
+	        }
+	    }
+	    BuildPipeline.PopAssetDependencies();
 		return true;
 	}
 	
@@ -440,22 +454,22 @@ public class BuildHelper
 		return succeed;
 	}
 	
-	private static bool EqualStrArray(string[] strList1, string[] strList2)
-	{
-		if(strList1 == null || strList2 == null)
-			return false;
+    //private static bool EqualStrArray(string[] strList1, string[] strList2)
+    //{
+    //    if(strList1 == null || strList2 == null)
+    //        return false;
 		
-		if(strList1.Length != strList2.Length)
-			return false;
+    //    if(strList1.Length != strList2.Length)
+    //        return false;
 		
-		for(int i = 0; i < strList1.Length; ++i)
-		{
-			if(strList1[i] != strList2[i])
-				return false;
-		}
+    //    for(int i = 0; i < strList1.Length; ++i)
+    //    {
+    //        if(strList1[i] != strList2[i])
+    //            return false;
+    //    }
 		
-		return true;
-	}
+    //    return true;
+    //}
 	
 	private static string GenerateOutputPathForBundle(string bundleName)
 	{

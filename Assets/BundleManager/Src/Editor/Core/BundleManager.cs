@@ -24,10 +24,16 @@ public class BundleManager
 	 */
 	static public BundleBuildState GetBuildStateOfBundle(string name)
 	{
-		if(getInstance().statesDict.ContainsKey(name))
-			return getInstance().statesDict[name];
-		else
-			return null;
+	    var dic = getInstance().statesDict;
+	    if (!dic.ContainsKey(name))
+	    {
+	        var newBuildState = new BundleBuildState();
+	        newBuildState.bundleName = name;
+            getInstance().statesDict.Add(name,newBuildState);
+
+	        dic[name] = newBuildState;
+	    }
+	    return dic[name];
 	}
 	
 	/**
@@ -37,14 +43,6 @@ public class BundleManager
 	{
 		get{return BMDataAccessor.Bundles.ToArray();}
 	}	
-	
-	/**
-	 * Return array of all bundle build states.
-	 */
-	static public BundleBuildState[] buildStates
-	{
-		get{return BMDataAccessor.BuildStates.ToArray();}
-	}
 	
 	/**
 	 * Return the list of all root bundles.
@@ -130,9 +128,9 @@ public class BundleManager
 			BMDataAccessor.Bundles.Remove(childeBundle);
 			InsertBundleToBundleList(childeBundle);
 		}
-		
-		UpdateBundleChangeTime(childeBundle.name);
-		BMDataAccessor.SaveBundleData();
+	    MarkTreeChanged(childeBundle);
+	    UpdateAllBundlesNeedBuild();
+		BMDataAccessor.ShouldSaveBundleData = true;
 	}
 
 	/**
@@ -468,12 +466,36 @@ public class BundleManager
         AddDependRefs(bundle);
 	}
 
+    public static List<BundleBuildState> BuildStatesToList()
+    {
+        return  new List<BundleBuildState>(getInstance().statesDict.Values);
+    }
+
+    public static void MarkTreeChanged(BundleData bundle)
+    {
+        var state = GetBuildStateOfBundle(bundle.name);
+        state.changed = true;
+        foreach (var childName in bundle.GetChildren())
+        {
+            MarkTreeChanged(GetBundleData(childName));
+        }
+    }
+
     public static void MarkParentsNeedBuild(BundleData bundle)
     {
         var extra = bundle.GetExtraData();
         extra.needBuild = true;
         var parentBundle = BundleManager.GetBundleData(bundle.parent);
         if(parentBundle!=null) MarkParentsNeedBuild(parentBundle);
+    }
+
+    public static void UpdateAllBundlesNeedBuild()
+    {
+        foreach (var bundle in bundles)
+        {
+            var state = GetBuildStateOfBundle(bundle.name);
+            if(state.changed) MarkParentsNeedBuild(bundle);
+        }
     }
 
     internal static void UpdateAllBundleChangeTime()
@@ -710,7 +732,7 @@ public class BundleManager
             //    bundle.dependGUIDs = PathsToGUIDs(bundle.dependAssets);
             //}
 
-			BMDataAccessor.ShouldSaveBundleDate = true;
+			BMDataAccessor.ShouldSaveBundleData = true;
 			BMDataAccessor.SaveBMConfiger();
 		}
 	}
@@ -719,35 +741,45 @@ public class BundleManager
 	{
 		BMDataAccessor.Refresh();
 
-		statesDict.Clear();
 		includeRefDict.Clear();
 		dependRefDict.Clear();
 
-		foreach(BundleBuildState buildState in BMDataAccessor.BuildStates)
-		{
-			if(!statesDict.ContainsKey(buildState.bundleName))
-				statesDict.Add(buildState.bundleName, buildState);
-			else
-				Debug.LogError("Bundle manger -- Cannot have two build states with same name [" + buildState.bundleName + "]");
-		}
+        bundleDict.Clear();
 
-		bundleDict.Clear();
+        foreach (BundleData bundle in BMDataAccessor.Bundles)
+        {
+            if (!bundleDict.ContainsKey(bundle.name))
+                bundleDict.Add(bundle.name, bundle);
+            else
+                Debug.LogError("Bundle manger -- Cannot have two bundle with same name [" + bundle.name + "]");
 
-		foreach(BundleData bundle in BMDataAccessor.Bundles)
-		{
-			if(!bundleDict.ContainsKey(bundle.name))
-				bundleDict.Add(bundle.name, bundle);
-			else
-				Debug.LogError("Bundle manger -- Cannot have two bundle with same name [" + bundle.name + "]");
-			
-			if(!statesDict.ContainsKey(bundle.name))
-				statesDict.Add(bundle.name, new BundleBuildState()); // Don't have build state of the this bundle. Add a new one.
-			
-			foreach(string guid in bundle.includeGUIDs)
-				AddIncludeRef(guid, bundle);
+            foreach (string guid in bundle.includeGUIDs)
+                AddIncludeRef(guid, bundle);
 
-			AddDependRefs(bundle);
-		}
+            AddDependRefs(bundle);
+        }
+	    foreach (var bundle in bundleDict.Values)
+	    {
+	        if (!string.IsNullOrEmpty(bundle.parent))
+	        {
+	            bundleDict[bundle.parent].GetChildren().Add(bundle.name);
+	        }
+	    }
+	    foreach (var bundle in bundleDict.Values)
+	    {
+	        bundle.GetChildren().Sort();
+	    }
+		
+        statesDict.Clear();
+        foreach (BundleBuildState buildState in BMDataAccessor.BuildStates)
+        {
+            if (!statesDict.ContainsKey(buildState.bundleName))
+                statesDict.Add(buildState.bundleName, buildState);
+            else
+                Debug.LogError("Bundle manger -- Cannot have two build states with same name [" + buildState.bundleName + "]");
+        }
+
+        UpdateAllBundlesNeedBuild();
 	}
 
 	static private BundleManager instance = null;

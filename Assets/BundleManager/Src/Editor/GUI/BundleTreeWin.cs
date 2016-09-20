@@ -73,10 +73,22 @@ internal class BundleTreeWin : EditorWindow
 				StartEditBundleName(m_EditWaitBundle);
 			}
 		}
+
+	    if (BMDataAccessor.ShouldSaveBundleData)
+	    {
+	        BMDataAccessor.ShouldSaveBundleData = false;
+	        BMDataAccessor.SaveBundleData();
+	    }
+	    if (BMDataAccessor.ShouldSaveBundleStates)
+	    {
+	        BMDataAccessor.ShouldSaveBundleStates = false;
+            BMDataAccessor.SaveBundleBuildeStates();
+	    }
 	}
 	
 	void OnGUI()
 	{
+	    System.Action _Task = null;
 		if(m_DragHandler == null)
 		{
 			// Setup GUI handler
@@ -86,8 +98,13 @@ internal class BundleTreeWin : EditorWindow
 			m_DragHandler.canRecieveCallBack = OnCanRecieve;
 			m_DragHandler.reciveDragCallBack = OnRecieve;
 		}
-		
-		if( Event.current.type == EventType.MouseDown || Event.current.type == EventType.DragUpdated  || !HasFocuse())
+	    if (m_InfoIcon == null)
+	    {
+	        m_InfoIcon = EditorGUIUtility.IconContent("console.infoicon.sml");
+	        m_WarnIcon = EditorGUIUtility.IconContent("console.warnicon.sml");
+	    }
+
+	    if( Event.current.type == EventType.MouseDown || Event.current.type == EventType.DragUpdated  || !HasFocuse())
 		{
 			// Any mouse down msg or lose focuse will cancle the edit waiting process
 			m_EditWaitStartTime = -1;
@@ -124,24 +141,49 @@ internal class BundleTreeWin : EditorWindow
 				    {
 				        menu.AddItem(new GUIContent("Quick Create"),false,QuickCreateAssetBundle);
 				    }
-					menu.DropDown(createBtnRect);
+				    if (m_Selections.Count == 1 && m_Selections[0].StartsWith("Character/model_"))
+				    {
+                        menu.AddItem(new GUIContent("Create Combat Bundle For This Character"),false,_CreateCombatBundleForCharacter);
+				    }
+				    menu.DropDown(createBtnRect);
 				}
-				
-				// Build button
+			    if (GUILayout.Button("Build Sel", EditorStyles.toolbarButton))
+			    {
+			        _Task = BuildSelection;
+			    }
+                if (GUILayout.Button("Build All", EditorStyles.toolbarButton))
+                {
+                    _Task = BuildHelper.BuildAll;
+                }
+                EditorGUILayout.Space();
+			    Rect scanRect = GUILayoutUtility.GetRect(new GUIContent("Scan"), EditorStyles.toolbarDropDown,GUILayout.ExpandWidth(false));
+			    if (GUI.Button(scanRect, "Scan", EditorStyles.toolbarDropDown))
+			    {
+                    GenericMenu menu = new GenericMenu();
+                    menu.AddItem(new GUIContent("Update Dependencies"),false,UpdateDependenciesForAllBundles);
+                    menu.AddItem(new GUIContent("Update Bundle Changes"),false,ScanChangesForAllBundles);
+                    menu.DropDown(scanRect);
+			    }
+			    // Build button
 				Rect buildBtnRect = GUILayoutUtility.GetRect(new GUIContent("Build"), EditorStyles.toolbarDropDown, GUILayout.ExpandWidth(false));
 				if( GUI.Button( buildBtnRect, "Build", EditorStyles.toolbarDropDown ) )
 				{
 					GenericMenu menu = new GenericMenu();
 					menu.AddItem(new GUIContent("Build Selection"), false, BuildSelection);
 					menu.AddItem(new GUIContent("Rebuild Selection"), false, RebuildSelection);
-					menu.AddItem(new GUIContent("Build All"), false, BuildAll);
-					menu.AddItem(new GUIContent("Rebuild All"), false, RebuildAll);
+                    menu.AddItem(new GUIContent("Build Selection(Don't Refresh)"),false,DirectBuildSelection);
+					menu.AddItem(new GUIContent("Build All"), false, BuildHelper.BuildAll);
+                    menu.AddItem(new GUIContent("Rebuild All"), false, BuildHelper.RebuildAll);
+                    menu.AddItem(new GUIContent("Build All (Don't Refresh)"),false,BuildHelper.DirectBuildAll);
 					menu.AddItem(new GUIContent("Clear"), false, ClearOutputs);
+                    menu.AddSeparator("");
+                    menu.AddItem(new GUIContent("Copy To DownloadPath"),false,CopyToDownloadPath);
 					menu.DropDown(buildBtnRect);
 				}
 
 			    GUILayout.FlexibleSpace();
 
+                GUILayout.Label(m_Selections.Count+" Selected");
 				if(GUILayout.Button("Settings", EditorStyles.toolbarButton))
 					BMSettingsEditor.Show();
 			}
@@ -183,6 +225,7 @@ internal class BundleTreeWin : EditorWindow
 				UpdateScrollBarBySelection(scrollViewRect.height);
 			
 		}EditorGUILayout.EndVertical();
+	    if (_Task != null) _Task();
 	}
 	
 	bool GUI_TreeItem(int indent, string bundleName)
@@ -216,6 +259,7 @@ internal class BundleTreeWin : EditorWindow
 	{
 	    var extra = bundle.GetExtraData();
 	    var state = BundleManager.GetBuildStateOfBundle(bundle.name);
+
 		bool isEditing = m_CurrentEditing == bundle.name;
 		bool isRecieving = m_CurrentRecieving == bundle.name;
 		bool isSelected = m_Selections.Contains(bundle.name);
@@ -303,6 +347,7 @@ internal class BundleTreeWin : EditorWindow
 		foreach(string bundle in m_Selections)
 			BundleManager.RemoveBundle(bundle);
 		
+        BMDataAccessor.SaveBundleData();
 		m_Selections.Clear();
 		Repaint();
 	}
@@ -673,6 +718,61 @@ internal class BundleTreeWin : EditorWindow
         }
     }
 
+    private void _CreateCombatBundleForCharacter()
+    {
+        var parentName = "Combat";
+        var srcBundle = m_Selections[0];
+        var destBundleName = srcBundle.Replace("Character/model_", "Combat/combat_");
+
+        var parentBundle = BundleManager.GetBundleData(parentName);
+        if (parentBundle == null)
+        {
+            Debug.LogError("Cannot find parent bundle:" + parentName);
+            return;
+        }
+
+        if (BundleManager.GetBundleData(destBundleName) != null)
+        {
+            Debug.LogWarning("Didn't creat["+ destBundleName +"].Its already in the bundle list.");
+            return;
+        }
+
+        if (!BundleManager.CreateNewBundle(destBundleName, parentName, BundleType.Normal))
+        {
+            Debug.LogError("Create failed,unexpeted.");
+            return;
+        }
+
+        //Add effects- 通过名字特征来搜索符合的特效
+        var keyword = srcBundle.Replace("Character/model_", "");
+        var guids = AssetDatabase.FindAssets(keyword, new[] {"Asset/_Prefab/Edit.Effect"});
+        foreach (var guid in guids)
+        {
+            var assetPath = AssetDatabase.GUIDToAssetPath(guid);
+            if(!Directory.Exists(assetPath))
+                BundleManager.AddPathToBundle(assetPath,destBundleName);
+        }
+
+        //Add Sounds - 声音的命名方式和特效不一样，使用特殊处理
+        var soundKeyword = keyword.Remove(keyword.IndexOf("_"), 1);
+        var soundGuids = AssetDatabase.FindAssets(soundKeyword, new[] {"Asset/_Prefab/Edit/Sound"});
+        foreach (var soundGuid in soundGuids)
+        {
+            var assetPath = AssetDatabase.GUIDToAssetPath(soundGuid);
+            if(!Directory.Exists(assetPath))
+                BundleManager.AddPathToBundle(assetPath,destBundleName);
+        }
+    }
+
+    private void CopyToDownloadPath()
+    {
+        var srcPath = BuildConfiger.InterpretedOutputPath;
+        var destPath = BMUtility.InterpretPath(BuildConfiger.CopyFolderStr, BuildConfiger.AutoBundleBuildtarget);
+
+        if(Directory.Exists(destPath)) Directory.Delete(destPath,true);
+        BuildHelper.CopyFiles(srcPath, destPath);
+    }
+
     void newDefBundleTo(string parent, BundleType bundleType)
 	{
 		// Find a new bundle name
@@ -696,6 +796,8 @@ internal class BundleTreeWin : EditorWindow
 		
 		StartEditBundleName(currentBundleName);
 	}
+
+    
 
     private void CreateBundleFromAssetWithFolder(Object asset,string parent = "")
     {
@@ -735,30 +837,18 @@ internal class BundleTreeWin : EditorWindow
             m_Selections.Add(currentBundleName);
         }
     }
-
-    void BuildAll()
-	{
-		BuildHelper.BuildAll();
-		BuildHelper.ExportBMDatasToOutput();
-	}
-	
-	void RebuildAll()
-	{
-		BuildHelper.RebuildAll();
-		BuildHelper.ExportBMDatasToOutput();
-	}
-	
 	void ClearOutputs()
 	{
 		string outputPath = BuildConfiger.InterpretedOutputPath;
 		if( !Directory.Exists(outputPath) )
 			return;
 		
-		foreach(string file in Directory.GetFiles(outputPath) )
-		{
-			File.Delete(file);
-			Debug.Log("Remove " + file);
-		}
+        //foreach(string file in Directory.GetFiles(outputPath) )
+        //{
+        //    File.Delete(file);
+        //    Debug.Log("Remove " + file);
+        //}
+        Directory.Delete(outputPath, true);
 	}
 	
 	void BuildSelection()
@@ -770,8 +860,40 @@ internal class BundleTreeWin : EditorWindow
 	{
 		BuildHelper.RebuildSelection(m_Selections.ToArray());
 	}
-	
-	bool OnCanRecieve(GUIDragHandler.DragDatas recieverData, GUIDragHandler.DragDatas dragData)
+
+    private void DirectBuildSelection()
+    {
+        BuildHelper.BuildBundles(m_Selections.ToArray());
+    }
+
+    private void UpdateDependenciesForAllBundles()
+    {
+        var a = Time.realtimeSinceStartup;
+        foreach (BundleData bundle in BundleManager.bundles)
+        {
+            BundleManager.RefreshBundleDependencies(bundle);
+        }
+        BMDataAccessor.DependencyUpdated = true;
+        if(BundleEditorDrawer.CurrentBundleEditor)
+            BundleEditorDrawer.CurrentBundleEditor.Repaint();
+        var b = Time.realtimeSinceStartup - a;
+        Debug.Log("Dependencies Updated. Time Consumed:"+b);
+    }
+
+    private void ScanChangesForAllBundles()
+    {
+        UpdateDependenciesForAllBundles();
+        var a = Time.realtimeSinceStartup;
+        BMDataAccessor.AssetStates.Clear();
+        foreach (BundleData bundle in BundleManager.bundles)
+        {
+            BuildHelper.RefreshBundleChanged(bundle);
+        }
+        var b = Time.realtimeSinceStartup - a;
+        Debug.Log("Changed State Updated. Time Consumed:" + b);
+    }
+
+    bool OnCanRecieve(GUIDragHandler.DragDatas recieverData, GUIDragHandler.DragDatas dragData)
 	{
 		if(dragData.customDragData == null && dragData.dragPaths.Length != 0)
 		{

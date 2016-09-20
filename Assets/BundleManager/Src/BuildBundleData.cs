@@ -50,6 +50,7 @@ public class BMUrls
 {
 	public Dictionary<string, string> downloadUrls;
 	public Dictionary<string, string> outputs;
+    public Dictionary<string, string> copyFolders; 
 	public BuildPlatform bundleTarget = BuildPlatform.Standalones;
 	public bool useEditorTarget = false;
 	public bool downloadFromOutput = false;
@@ -66,6 +67,14 @@ public class BMUrls
 			{"WP8", ""}
 		};
 		outputs = new Dictionary<string, string>()
+		{
+			{"WebPlayer", ""},
+			{"Standalones", ""},
+			{"IOS", ""},
+			{"Android", ""},
+			{"WP8", ""}
+		};
+        copyFolders = new Dictionary<string, string>()
 		{
 			{"WebPlayer", ""},
 			{"Standalones", ""},

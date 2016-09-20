@@ -15,7 +15,7 @@ internal class BMGUIStyles
 		{
 			// Instancial
 			instance = new BMGUIStyles();
-			GUIStyleSet styleSet = (GUIStyleSet)AssetDatabase.LoadAssetAtPath("Assets/BundleManager/customStyles.asset", typeof(GUIStyleSet));
+			GUIStyleSet styleSet = (GUIStyleSet)AssetDatabase.LoadAssetAtPath("Assets/BundleManager/Editor/customStyles.asset", typeof(GUIStyleSet));
 			var styles = EditorGUIUtility.isProSkin ? styleSet.styles : styleSet.freeStyles;
 			foreach(GUIStyle style in styles)
 			{

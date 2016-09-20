@@ -1,3 +1,5 @@
+using System.CodeDom;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using System.Collections;
@@ -108,7 +110,7 @@ internal class BMDataAccessor
 	}
 
     public static bool DependencyUpdated = false;
-    public static bool ShouldSaveBundleDate = false;
+    public static bool ShouldSaveBundleData = false;
     public static bool ShouldSaveBundleStates = false;
 
 	static public void Refresh()
@@ -136,10 +138,38 @@ internal class BMDataAccessor
 	
 	static public void SaveBundleBuildeStates()
 	{
+	    m_BuildStates = BundleManager.BuildStatesToList();
 		saveObjectToJsonFile(BuildStates, BundleBuildStatePath);
+        Debug.Log("BuildStates Saved.");
 	}
-	
-	static public void SaveUrls()
+
+    public static void SaveBundleBuildVersion()
+    {
+        if (m_BuildVersion > 0)
+        {
+            File.WriteAllText(BundleBuildVersionPath,m_BuildVersion.ToString());
+        }
+    }
+
+    public static void SaveBundleVersionInfo()
+    {
+        var bundleVersionInfos = BMDataAccessor.Bundles.Select(data =>
+        {
+            var state = BundleManager.GetBuildStateOfBundle(data.name);
+            return new BundleVersionInfo()
+            {
+                name = data.name,
+                parent = data.parent,
+                requestString = state.requestString,
+                crc = state.crc,
+                size = state.size,
+                priority = data.priority,
+            };
+        }).ToList();
+        saveObjectToJsonFile(bundleVersionInfos,BundleVersionInfoPath);
+    }
+
+    static public void SaveUrls()
 	{
 		saveObjectToJsonFile(Urls, UrlDataPath);
 	}
@@ -203,13 +233,13 @@ internal class BMDataAccessor
 	static private BMConfiger m_BMConfier = null;
 	static private BMUrls m_Urls = null;
 		
-	public const string BundleDataPath = "Assets/BundleManager/BundleData.txt";
-	public const string BMConfigerPath = "Assets/BundleManager/BMConfiger.txt";
-	public const string UrlDataPath = "Assets/BundleManager/Resources/Urls.txt";
-
+	public const string BundleDataPath = "Assets/BundleManager/Editor/BundleData.txt";
+    public const string BMConfigerPath = "Assets/BundleManager/Editor/BMConfiger.txt";
+    public const string UrlDataPath = "Assets/BundleManager/Resources/Urls.txt";
+    public const string BundleVersionInfoPath = "Assets/BundleManager/Editor/BundleVersionInfo.txt";
 
     public static string BundleBuildStatePath { get { return string.Format(_BundleBuildStatePath_Format,BuildConfiger.AutoBundleBuildtarget);}}
-    public const string _BundleBuildStatePath_Format = "Assets/BundleManager/Editor/BuildState_{0}.txt";
+    public const string _BundleBuildStatePath_Format = "Assets/BundleManager/Editor/BuildStates_{0}.txt";
 
     public static string BundleBuildVersionPath {get { return string.Format(BundleBuildVersionPath_Format, BuildConfiger.AutoBundleBuildtarget); }}
     public const string BundleBuildVersionPath_Format = "Assets/BundleManager/Editor/BMDateVersion_{0}.txt";

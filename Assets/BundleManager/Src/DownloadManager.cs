@@ -1,4 +1,5 @@
-using System.Security.AccessControl;
+#define ALWAYS_UPDATE_LOCAL
+
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -52,8 +53,8 @@ public class DownloadManager : MonoBehaviour
 			return isRequested;
 		}
 	}
-	
-	/**
+
+    /**
 	 * Get WWW instance of the url.
 	 * @return Return null if the WWW request haven't succeed.
 	 */ 
@@ -72,84 +73,131 @@ public class DownloadManager : MonoBehaviour
     //    }
     //    else
     //        return null;
-    //}    //public WWW GetWWW(string url)
-    //{
-    //    if(!ConfigLoaded)
-    //        return null;
-		
-    //    url = formatUrl(url);
-		
-    //    if(succeedRequest.ContainsKey(url))
-    //    {
-    //        WWWRequest request = succeedRequest[url];
-    //        prepareDependBundles( stripBundleSuffix(request.requestString) );
-    //        return request.www;
-    //    }
-    //    else
-    //        return null;
-    //}    //public WWW GetWWW(string url)
-    //{
-    //    if(!ConfigLoaded)
-    //        return null;
-		
-    //    url = formatUrl(url);
-		
-    //    if(succeedRequest.ContainsKey(url))
-    //    {
-    //        WWWRequest request = succeedRequest[url];
-    //        prepareDependBundles( stripBundleSuffix(request.requestString) );
-    //        return request.www;
-    //    }
-    //    else
-    //        return null;
-    //}    //public WWW GetWWW(string url)
-    //{
-    //    if(!ConfigLoaded)
-    //        return null;
-		
-    //    url = formatUrl(url);
-		
-    //    if(succeedRequest.ContainsKey(url))
-    //    {
-    //        WWWRequest request = succeedRequest[url];
-    //        prepareDependBundles( stripBundleSuffix(request.requestString) );
-    //        return request.www;
-    //    }
-    //    else
-    //        return null;
-    //}    //public WWW GetWWW(string url)
-    //{
-    //    if(!ConfigLoaded)
-    //        return null;
-		
-    //    url = formatUrl(url);
-		
-    //    if(succeedRequest.ContainsKey(url))
-    //    {
-    //        WWWRequest request = succeedRequest[url];
-    //        prepareDependBundles( stripBundleSuffix(request.requestString) );
-    //        return request.www;
-    //    }
-    //    else
-    //        return null;
-    //}    //public WWW GetWWW(string url)
-    //{
-    //    if(!ConfigLoaded)
-    //        return null;
-		
-    //    url = formatUrl(url);
-		
-    //    if(succeedRequest.ContainsKey(url))
-    //    {
-    //        WWWRequest request = succeedRequest[url];
-    //        prepareDependBundles( stripBundleSuffix(request.requestString) );
-    //        return request.www;
-    //    }
-    //    else
-    //        return null;
-    //}
-	
-	public IEnumerator WaitDownload(string url)
+    //}    
+   
+    public AssetBundle GetAssetBundle(string bundleName)
+    {
+        if (!ConfigLoaded)
+            return null;
+        if (succeedRequest.ContainsKey(bundleName))
+        {
+            WWWRequest request = succeedRequest[bundleName];
+            return request.assetBundle;
+        }
+        else
+            return null;
+	}
+
+    public IEnumerator CheckUpdate(string downloadPath)
+    {
+        while (!ConfigLoaded) yield return null;
+
+        var downloadPathStr = BMUtility.InterpretPath(downloadPath, curPlatform);
+        if (string.IsNullOrEmpty(downloadPathStr))
+        {
+            CheckUpdateError = "{BM} Invalid update download path"+downloadPathStr;
+            yield break;
+        }
+
+        remoteRootUrl = new Uri(downloadPathStr).AbsoluteUri;
+
+        //Try to get Url redirect file
+        var redirectUrl = formatUrl(remoteRootUrl, "BMRedirect.txt");
+        if (!string.IsNullOrEmpty(redirectUrl))
+        {
+            WWW redirectWWW = new WWW(redirectUrl);
+            yield return redirectWWW;
+
+            if (redirectWWW.error == null)
+            {
+                //Redirect download
+                var redirectedDownloadPath = redirectWWW.text;
+                downloadPathStr = BMUtility.InterpretPath(redirectedDownloadPath, curPlatform);
+                if (string.IsNullOrEmpty(downloadPathStr))
+                {
+                    Debug.LogError("{BM} Invalid redirected download Path :" + downloadPathStr+"(Retrived from url:"+redirectUrl+")."+
+                        "Using the original download path"+remoteRootUrl);
+                }
+                else
+                {
+                    remoteRootUrl = new Uri(downloadPathStr).AbsoluteUri;
+                }
+            }
+            redirectWWW.Dispose();
+        }
+
+        var versionInfo = new VersionInfo(remoteRootUrl);
+        yield return StartCoroutine(downloadVersionInfoCo(versionInfo));
+        CheckUpdateError = versionInfo.error;
+
+        if (versionInfo.isValue)
+        {
+            UpdateTotalSize = 0;
+            UpdateVersion = versionInfo.listVersion;
+
+            mergeVersion(versionInfo);
+            refreshBundleDict();
+        }
+
+        updateList = new List<BundleDownloadInfo>();
+        foreach (var bundleDownloadInfo in bundles)
+        {
+            if (bundleDownloadInfo.needDownload)
+            {
+                if (!updateList.Contains(bundleDownloadInfo))
+                {
+                    updateList.Add(bundleDownloadInfo);
+                    UpdateTotalSize += bundleDownloadInfo.versionInfo.size;
+                }
+            }
+        }
+    }
+
+    public IEnumerator UpdateBundles()
+    {
+        if(!initializationFinished) yield break;
+        initializationFinished = false;
+        StopAll();
+
+        foreach (var req in succeedRequest.Values)
+        {
+            var ab = req.assetBundle;
+            if(ab) ab.Unload(false);
+        }
+
+        string[]  disposeRequestArray = new string[succeedRequest.Count+failedRequest.Count];
+        succeedRequest.Keys.CopyTo(disposeRequestArray,0);
+        failedRequest.Keys.CopyTo(disposeRequestArray,succeedRequest.Count);
+        foreach (var req in disposeRequestArray)
+        {
+            DisposeBundle(req);
+        }
+
+        long downloadFileSize = 0;
+        for (int i = 0; i < updateList.Count; ++i)
+        {
+            var info = updateList[i];
+            UpdateFinishFielCount = i + 1;
+            var www = WWW.LoadFromCacheOrDownload(info.url, info.version);
+            do
+            {
+                yield return null;
+                UpdateFinishSize = downloadFileSize + (long) (www.progress*info.versionInfo.size);
+            } while (!www.isDone);
+            www.Dispose();
+            downloadFileSize += info.versionInfo.size;
+            UpdateFinishSize = downloadFileSize;
+            info.needDownload = false;
+            BMUtility.SaveToPersistentData(bundles,DOWNLOAD_INFO_CACHE_NAME);
+        }
+        CurrentVesion = UpdateVersion;
+        PlayerPrefs.SetInt(BMDATA_VERSION_PREFSKEY,CurrentVesion);
+        initializationFinished = true;
+    }
+
+
+
+    public IEnumerator WaitDownload(string url)
 	{
 		yield return StartCoroutine( WaitDownload(url, -1) );
 	}
@@ -207,7 +255,7 @@ public class DownloadManager : MonoBehaviour
 
             if (processingRequest.ContainsKey(bundleName))
 			{
-                processingRequest[bundleName].www.Dispose();
+                processingRequest[bundleName].DisposeWWW();
                 processingRequest.Remove(bundleName);
 			}
 		}
@@ -272,32 +320,40 @@ public class DownloadManager : MonoBehaviour
 		waitingRequests.Clear();
 		
 		foreach(WWWRequest request in processingRequest.Values)
-			request.www.Dispose();
+			request.DisposeWWW();
 		
 		processingRequest.Clear();
 	}
-	
-	/**
-	 * Get download progress of bundles.
+
+    public float ProgressOfBundle(string bundleName)
+    {
+        if (!ConfigLoaded) return 0f;
+        if (processingRequest.ContainsKey(bundleName))
+            return processingRequest[bundleName].progress;
+
+        if (succeedRequest.ContainsKey(bundleName))
+            return 1;
+        return 0;
+    }
+
+    /**
+	 * Get download progress of bundles.ÏÂÔØbundle¸üÐÂ
 	 * All bundle dependencies will be counted too.
 	 * This method can only used on self built bundles.
 	 */ 
-	public float ProgressOfBundles(string[] bundlefiles)
+	public float ProgressOfBundles(string[] bundleNames)
 	{
 		if(!ConfigLoaded)
 			return 0f;
 		
 		List<string> bundles = new List<string>();
-		foreach(string bundlefile in bundlefiles)
+        foreach (string bundleName in bundleNames)
 		{
-			if(!bundlefile.EndsWith( "." + bmConfiger.bundleSuffix, System.StringComparison.OrdinalIgnoreCase))
+            if (!bundleDict.ContainsKey(bundleName))
 			{
-				Debug.LogWarning("ProgressOfBundles only accept bundle files. " + bundlefile + " is not a bundle file.");
+                Debug.LogWarning("ProgressOfBundles only accept bundle files. " + bundleName + " is not a bundle file.");
 				continue;
 			}
-
-		    var idx = bundlefile.LastIndexOf("." + bmConfiger.bundleSuffix);
-		    var bundleName = bundlefile.Substring(0, idx);
             bundles.Add(bundleName);
 		}
 		
@@ -340,7 +396,29 @@ public class DownloadManager : MonoBehaviour
 			return ((float)currentSize)/totalSize;
 	}
 
-	/**
+    public IEnumerable GetFinishedRequests()
+    {
+        foreach (var bundleName in succeedRequest.Keys)
+        {
+            yield return bundleName;
+        }
+        foreach (var bundleName in failedRequest.Keys)
+        {
+            yield return bundleName;
+        }
+    }
+
+    public void ResetRession()
+    {
+        sessionUrls.Clear();
+    }
+
+    public float GetSessionPorgress()
+    {
+        return ProgressOfBundles(sessionUrls.ToArray());
+    }
+
+    /**
 	 * Check if the config files downloading finished.
 	 */
 	public bool ConfigLoaded
@@ -498,8 +576,8 @@ public class DownloadManager : MonoBehaviour
 				else
 				{
 				    request.DisposeWWW();
-					newFaileds.Add( request.bundleName );
-					Debug.LogError("Download " + request.bundleName + " failed for " + request.triedTimes + " times.\nError: " + request.error);
+					newFaileds.Add(request.bundleName);
+					Debug.LogError("{BM}Download Bundle " + request.bundleName +"URL:"+request.info.url+ "failed for " + request.triedTimes + " times.\nError: " + request.error);
 				}
 			}
 			else if(request.isDone)
@@ -1023,7 +1101,9 @@ public class DownloadManager : MonoBehaviour
     public static void CleanCache()
     {
         Caching.CleanCache();
-        
+        BMUtility.DeletePersistentData(DOWNLOAD_INFO_CACHE_NAME);
+        BMUtility.DeletePersistentData(CONFIGER_CACHE_NAME);
+        PlayerPrefs.DeleteKey(BMDATA_VERSION_PREFSKEY);
     }
 
     class VersionInfo

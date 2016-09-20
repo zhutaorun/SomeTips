@@ -34,7 +34,7 @@ public static class BundleEditorDrawer
 	static bool m_IsMetaListSelect = false;
 	static double m_LastClickTime = 0;
 
-
+    private static bool m_HideGreenDependencies = false;
 	//
 	public static void ShowBundle(BundleData newBundle)
 	{
@@ -144,7 +144,7 @@ public static class BundleEditorDrawer
 				GUILayout.Label("Priority", EditorStyles.boldLabel);
 			    var priorityIndex = currentBundle.priority + 5;
                 priorityIndex = EditorGUILayout.Popup(priorityIndex, PriorityNameList, GUILayout.MaxWidth(70));
-                currentBundle.priority = priorityIndex;
+                currentBundle.priority = priorityIndex-5;
 			}
 			GUILayout.EndHorizontal();
 			
@@ -162,6 +162,7 @@ public static class BundleEditorDrawer
 		GUILayout.BeginHorizontal();
 		{
 			GUILayout.FlexibleSpace();
+		    m_HideGreenDependencies = GUILayout.Toggle(m_HideGreenDependencies, "Hide Green", "button");
 			if(GUILayout.Button("Refresh") && currentBundle != null)
 			{
 				BundleManager.RefreshBundleDependencies(currentBundle);
@@ -272,7 +273,9 @@ public static class BundleEditorDrawer
 				{
 					string assetPath = AssetDatabase.GUIDToAssetPath(guid);
 					bool isCurrentPathSelect = m_CurSelectAsset == guid && m_IsMetaListSelect;
-					if( GUI_AssetItem( assetPath, isCurrentPathSelect, GetSharedIconOfDepend(guid) ) != AssetItemState.None )
+				    var iconTexture = GetSharedIconOfDepend(guid);
+                    if(m_HideGreenDependencies&& iconTexture && iconTexture.name=="sharedAsset") continue;
+					if( GUI_AssetItem( assetPath, isCurrentPathSelect, iconTexture ) != AssetItemState.None )
 					{
 						if(!isCurrentPathSelect)
 						{

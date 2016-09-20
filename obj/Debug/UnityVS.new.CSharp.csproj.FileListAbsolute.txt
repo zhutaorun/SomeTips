@@ -1,0 +1,12 @@
+F:\OneDrive\new\obj\Debug\UnityVS.new.CSharp.csprojResolveAssemblyReference.cache
+F:\OneDrive\new\Temp\UnityVS_bin\Debug\Assembly-CSharp.dll
+F:\OneDrive\new\Temp\UnityVS_bin\Debug\Assembly-CSharp.pdb
+F:\OneDrive\new\Temp\UnityVS_bin\Debug\UnityEditor.dll
+F:\OneDrive\new\Temp\UnityVS_bin\Debug\UnityEngine.dll
+F:\OneDrive\new\Temp\UnityVS_bin\Debug\UnityEngine.UI.dll
+F:\OneDrive\new\Temp\UnityVS_bin\Debug\Assembly-CSharp-firstpass.pdb
+F:\OneDrive\new\Temp\UnityVS_bin\Debug\UnityEngine.xml
+F:\OneDrive\new\Temp\UnityVS_bin\Debug\UnityEditor.xml
+F:\OneDrive\new\Temp\UnityVS_bin\Debug\UnityEngine.UI.xml
+F:\OneDrive\new\obj\Debug\Assembly-CSharp.dll
+F:\OneDrive\new\obj\Debug\Assembly-CSharp.pdb

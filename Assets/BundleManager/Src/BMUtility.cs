@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿#define ALWAYS_UPDATE_LOCAL
+using System;
+using System.IO;
 using LitJson;
 using UnityEngine;
 using System.Collections;
@@ -104,5 +106,22 @@ public class BMUtility
         tw.WriteLine(jsonStr);
         tw.Flush();
         tw.Close();
+    }
+
+    public static void DeletePersistentData(string fileName)
+    {
+        var path = System.IO.Path.Combine(Application.persistentDataPath, fileName);
+        if (File.Exists(path))
+        {
+            try
+            {
+                File.Delete(path);
+            }
+            catch (System.Exception e)
+            {
+                
+                Debug.LogError(e.Message);
+            }
+        }
     }
 }
