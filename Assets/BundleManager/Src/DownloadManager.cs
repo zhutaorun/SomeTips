@@ -22,7 +22,17 @@ public class DownloadManager : MonoBehaviour
     public const string DOWNLOAD_INFO_CACHE_NAME = "BMDownloadInfoCache.json";
     public const string CONFIGER_CACHE_NAME = "BMConfigerCache.json";
 
-	/**
+    /*
+     * Get the bundle info of a specified name
+     */
+
+    public BundleDownloadInfo GetBundleInfo(string bundleName)
+    {
+        if (bundleDict.ContainsKey(bundleName)) return bundleDict[bundleName];
+        return null;
+    }
+
+    /**
 	 * Get the error string of WWW request.
 	 * @return The error string of WWW. Return null if WWW request succeed or still in processing.
 	 */ 
