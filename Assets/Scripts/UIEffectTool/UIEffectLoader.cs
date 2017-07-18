@@ -8,7 +8,7 @@ public class UIEffectLoader : MonoBehaviour
     GameObject _effectGO;
     string _pending;
     UiFxSort _fxSort;
-
+    Coroutine load;
     void Awake()
     {
         _fxSort = GetComponent<UiFxSort>();
@@ -33,7 +33,7 @@ public class UIEffectLoader : MonoBehaviour
         if (_pending != null && isActiveAndEnabled)
         {
             StopAllCoroutines();
-            Client.Ins.StartCoroutione(loadCo(_pending));
+            load = StartCoroutine(loadCo(_pending));
             _pending = null;
         }
     }

@@ -63,17 +63,17 @@ public class LoadingDomain : MonoBehaviour
                     var p = task.calcProgress == null
                         ? Mathf.Clamp01((Time.time - task._taskStartTime)/task.weight)
                         : task.calcProgress()*task.weight;
-                    paratialProgress += P;
+                    paratialProgress += p;
                 }
             }
-            paratialProgress = (finishedProgress + partialProgress)/totalProgress;
+            paratialProgress = (finishedProgress + paratialProgress) / totalProgress;
             if (parallel)
             {
                 if (hasFinishedTask || processingTasks.Count == 0)
                 {
                     for (int i = waitingTasks.Count-1; i >=0; --i)
                     {
-                        tryDequeueOnWaitingTask(i);
+                        tryDequeueOneWaitingTask(i);
                     }
                 }
             }
@@ -83,7 +83,7 @@ public class LoadingDomain : MonoBehaviour
                 {
                     for (int i = 0; i < waitingTasks.Count; i++)
                     {
-                        if(tryDequeueOnWaitingTask(i)) break;
+                        if(tryDequeueOneWaitingTask(i)) break;
                     }
                 }
             }
@@ -94,11 +94,11 @@ public class LoadingDomain : MonoBehaviour
 
     private bool tryDequeueOneWaitingTask(int i)
     {
-        var task = waitingTask[i];
+        var task = waitingTasks[i];
         if (isAllDependenciesReady(task))
         {
-            waitingTask.Remove(i);
-            processingTask.Add(task);
+            waitingTasks.RemoveAt(i);
+            processingTasks.Add(task);
             if (task.function != null) task.function();
             if (task.coroutine != null) StartCoroutine(runTask(task));
             else task.isDone = true;

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
 public class Loader : MonoBehaviour
 {
@@ -71,7 +72,7 @@ public class Loader : MonoBehaviour
     private void Update()
     {
         idleTaskLines.Clear();
-        for (int i = 0; i < runningTasks.Lengtj; i++)
+        for (int i = 0; i < runningTasks.Length; i++)
         {
             var t = runningTasks[i];
             if (t == null)

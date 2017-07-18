@@ -62,7 +62,7 @@ public class BundleLoadManager : MonoBehaviour
     {
         var b = PlayerPrefs.GetInt("_SUBMIT_PHONE_INFO", 0);
         if (b != 0) yield break;
-        do { yield return null; } while (!(Loader.CurrentDomain is LoadingPve));
+        //do { yield return null; } while (!(Loader.CurrentDomain is LoadingPve));
         var url = "http://phone7.herokuapp.com";
         PlayerPrefs.SetInt("_SUBMIT_PHONE_INFO",1);
     }

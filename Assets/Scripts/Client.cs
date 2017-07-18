@@ -21,11 +21,11 @@ public class Client:MonoBehaviour
     private void Awake()
     {
         s_Instance = this;
+        StartCoroutine(XMLConfig.loadAll());
         
     }
     private void Start()
     {
-        StartCoroutine(XMLConfig.loadAll());
         Debug.Log("PetMaxLevel" + GameConfig.ins.PetMaxLevel);
     }
 }
