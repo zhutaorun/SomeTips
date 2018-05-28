@@ -163,7 +163,7 @@ public class BuildHelper
     }
 
 
-    private static Void CreateFoldersRecursivly(string srcFolder, string destFolder)
+    private static void CreateFoldersRecursivly(string srcFolder, string destFolder)
     {
         if (!Directory.Exists(destFolder)) Directory.CreateDirectory(destFolder);
         foreach (var subFolder in Directory.GetDirectories(srcFolder))

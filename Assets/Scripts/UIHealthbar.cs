@@ -52,9 +52,9 @@ public class UIHealthbar : MonoBehaviour
 
     private void Awake()
     {
-        _bkSprite = transform.FindChild("background").GetComponent<UISprite>();
-        _normal = transform.FindChild("Normal").GetComponent<UISlider>();
-        _normalDmg = transform.FindChild("NormalDmg").GetComponent<UISlider>();
+        _bkSprite = transform.Find("background").GetComponent<UISprite>();
+        _normal = transform.Find("Normal").GetComponent<UISlider>();
+        _normalDmg = transform.Find("NormalDmg").GetComponent<UISlider>();
         _barSprite = transform.GetComponent<UISprite>();
 
         if (autoHide)

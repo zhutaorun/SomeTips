@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 Shader "Transparent/Refractive"
 {
 	Properties
@@ -66,7 +68,7 @@ Shader "Transparent/Refractive"
 #if SHADER_API_D3D11
 				UNITY_INITIALIZE_OUTPUT(Input, o);
 #endif
-				o.position = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.position = UnityObjectToClipPos(v.vertex);
 				
 				#if UNITY_UV_STARTS_AT_TOP
 					float scale = -1.0;

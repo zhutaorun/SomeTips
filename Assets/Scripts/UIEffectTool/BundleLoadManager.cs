@@ -166,7 +166,7 @@ public class BundleLoadManager : MonoBehaviour
             if (obj != BundleLoadManager.Instance) return obj;
             
             //从AssetBundle中加载资源并且缓存起来
-            obj= assetBundle.Load(resourceName, type);
+            obj= assetBundle.LoadAsset(resourceName, type);
             if (obj == null)
             {
 #if UNITY_EDITOR
@@ -186,7 +186,7 @@ public class BundleLoadManager : MonoBehaviour
             if(obj!=BundleLoadManager.Instance) yield break;
 
             //从AssetBundle中加载资源并且缓存起来
-            var _asyncOp = assetBundle.LoadAsync(resourceName, type);
+            var _asyncOp = assetBundle.LoadAssetAsync(resourceName, type);
             yield return _asyncOp;
             if(assetBundle==null) yield break;
             obj = _asyncOp.asset;
@@ -255,7 +255,7 @@ public class BundleLoadManager : MonoBehaviour
                 //如果参数为true则预加载所有资源
                 if (guaranteeFutureLoading)
                 {
-                    objects = new List<Object>(assetBundle.LoadAll());
+                    objects = new List<Object>(assetBundle.LoadAllAssets());
                 }
                 //卸载AssetBundle(仅Bundle部分)
                 DownloadManager.Instance.DisposeBundle(assetBundleName);

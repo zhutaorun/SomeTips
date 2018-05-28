@@ -12,7 +12,7 @@ using LitJson;
  */ 
 public class DownloadManager : MonoBehaviour 
 {
-    //HACK: н╙акхц╠Ю╪╜фВ╧╓вВуЩх╥тквВё╛хГ╧ШЁЖожакнч╥╗обть╦Эпб╟Э╣дгИ©Жр╙╣щтЖуБ╦Ж╟Ф╠╬йЩвжё╛г©жф©м╩╖╤кгЕ©уCacheобтьпб╟Э
+    //HACK: н╙О©╫О©╫О©╫ц╠Ю╪╜О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫х╥О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ч╥О©╫О©╫О©╫О©╫ь╦О©╫О©╫б╟О©╫О©╫О©╫О©╫О©╫О©╫р╙О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫Ф╠╬О©╫О©╫О©╫жёО©╫г©О©╫ф©м╩О©╫О©╫О©╫О©╫О©╫О©╫CacheО©╫О©╫О©╫О©╫О©╫б╟О©╫
 
     private const int FORCE_DOWNLOAD_VERSION = 17;
 
@@ -347,7 +347,7 @@ public class DownloadManager : MonoBehaviour
     }
 
     /**
-	 * Get download progress of bundles.обтьbundle╦Эпб
+	 * Get download progress of bundles.О©╫О©╫О©╫О©╫bundleО©╫О©╫О©╫О©╫
 	 * All bundle dependencies will be counted too.
 	 * This method can only used on self built bundles.
 	 */ 
@@ -478,8 +478,8 @@ public class DownloadManager : MonoBehaviour
 	        yield break;
 	    }
 #if UNITY_EDITOR
-        //HACK:н╙акхц╠Ю╪╜фВ╧╓вВ©иртуЩЁётквВ
-        //хГ╧ШЁЖожакнч╥╗обть╦Эпб╟Э╣дгИ©Жр╙╣щтЖуБ╦Ж╟Ф╠╬йЩвжё╛г©жф©м╩╖╤кгЕ©уCacheобть╟Э
+        //HACK:н╙О©╫О©╫О©╫ц╠Ю╪╜О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫
+        //О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ч╥О©╫О©╫О©╫О©╫ь╦О©╫О©╫б╟О©╫О©╫О©╫О©╫О©╫О©╫р╙О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫Ф╠╬О©╫О©╫О©╫жёО©╫г©О©╫ф©м╩О©╫О©╫О©╫О©╫О©╫О©╫CacheО©╫О©╫О©╫ь╟О©╫
 	    if (!PlayerPrefs.HasKey(FORCE_DOWNLOAD_PREFSKEY) ||
 	        PlayerPrefs.GetInt(FORCE_DOWNLOAD_PREFSKEY) < FORCE_DOWNLOAD_VERSION)
 	    {
@@ -491,14 +491,14 @@ public class DownloadManager : MonoBehaviour
 	    // Initial download urls
 		initRootUrl();
 
-        //╢с╠╬╩З╩╨╢Ф╣дйЩ╬щжп╤ах║йЩ╬щ
+        //О©╫с╠О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫п╤О©╫х║О©╫О©╫О©╫О©╫
 	    int lastBMDataVersion = 0;
 	    if (PlayerPrefs.HasKey(BMDATA_VERSION_PREFSKEY))
 	    {
 	        lastBMDataVersion = PlayerPrefs.GetInt(BMDATA_VERSION_PREFSKEY);
 #if UNITY_EDITOR && ALWAYS_UPDATE_LOCAL
-            //тз╠Ю╪╜фВдёй╫об©идэ©╙╥╒уъжпр╡╩А╢Р╟Эё╛уБяЫ╩А╣╪жб©╙╥╒╧ЩЁлжп╠╬╩З╩╨╢Ф╣д╟Э╟Ф╠╬йЩвж╨мжВ╦и╣д╟Ф╠╬йЩвж╡ЗиЗЁЕм╩
-            //кЫрт╠Ю╪╜фВдёй╫обнчйс╟Ф╠╬йЩвж╩╨╢Ф
+            //О©╫з╠Ю╪╜О©╫О©╫дёй╫О©╫б©О©╫О©╫э©О©╫О©╫О©╫О©╫О©╫О©╫О©╫р╡О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫А╣╪О©╫б©О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫п╠О©╫О©╫О©╫О©╫О©╫О©╫О©╫д╟О©╫О©╫Ф╠╬О©╫О©╫О©╫ж╨О©╫О©╫О©╫О©╫и╣д╟Ф╠╬О©╫О©╫О©╫ж╡О©╫О©╫О©╫О©╫О©╫м╩
+            //О©╫О©╫О©╫т╠Ю╪╜О©╫О©╫дёй╫О©╫О©╫О©╫О©╫О©╫с╟Ф╠╬О©╫О©╫О©╫ж╩О©╫О©╫О©╫
             lastBMDataVersion =0;
 #endif
         }
@@ -514,7 +514,7 @@ public class DownloadManager : MonoBehaviour
 
 
 
-        //хГ╧Ш╤ах║йЩ╬щжпЁЖожнйлБё╛тРгЕ©укЫсп╩╨╢Фё╛ж╝╨С©ирт╢сLoadRootUrlжьпбиЗЁийЩ╬щ
+        //О©╫О©╫О©╫О©╫О©╫х║О©╫О©╫О©╫О©╫О©╫пЁО©╫О©╫О©╫О©╫О©╫О©╫Бё╛О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫п╩О©╫О©╫Фё╛ж╝О©╫О©╫О©╫О©╫т╢О©╫LoadRootUrlО©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫
 	    if (bundles == null || bmConfiger == null)
 	    {
 	        DownloadManager.CleanCache();
@@ -524,8 +524,8 @@ public class DownloadManager : MonoBehaviour
 	    }
 	    refreshBundleDict();
 
-        //Ё╒йт╢сLoadDownloadUrlобть╟Ф╠╬пео╒
-        //мФ╪р╦Эпб©м╩╖╤к╨С©идэLoadDownLoadUrlжп╟Ф╠╬╩АЁин╙вНпб╟Ф╠╬ё╛уБжжгИ©Жм╛яЫпХр╙mergeVersion╨м╢с╠╬╣ь╦Эпбобть
+        //О©╫О©╫О©╫т╢О©╫LoadDownloadUrlО©╫О©╫О©╫ь╟Ф╠╬О©╫О©╫о╒
+        //О©╫О©╫р╦О©╫О©╫б©м╩О©╫О©╫к╨О©╫О©╫О©╫О©╫LoadDownLoadUrlО©╫п╟Ф╠╬О©╫О©╫О©╫н╙О©╫О©╫О©╫б╟Ф╠╬О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫м╛О©╫О©╫О©╫О©╫р╙mergeVersionО©╫м╢с╠О©╫О©╫ь╦О©╫О©╫О©╫О©╫О©╫О©╫О©╫
 	    if (string.IsNullOrEmpty(localRootUrl))
 	    {
 
@@ -675,7 +675,7 @@ public class DownloadManager : MonoBehaviour
 	    if (!bundleDict.ContainsKey(bundleName))
 	    {
 #if UNITY_EDITOR
-            Debug.LogError("{BM} ап╠Мжп╡╩╢ФтзBundle["+bundleName+"],нч╥╗обть.");
+            Debug.LogError("{BM} О©╫п╠О©╫О©╫п╡О©╫О©╫О©╫О©╫О©╫Bundle["+bundleName+"],О©╫ч╥О©╫О©╫О©╫О©╫О©╫.");
 #else
             Debug.LogError("{BM} Cannot download bundle["+bundlename+"],It's not in the bundle config.");
 #endif
@@ -825,7 +825,7 @@ public class DownloadManager : MonoBehaviour
                 case UnityEditor.BuildTarget.Android:
 		            curPlatform = BuildPlatform.Android;
 		            break;
-                case UnityEditor.BuildTarget.iPhone:
+                case UnityEditor.BuildTarget.iOS:
 		            curPlatform = BuildPlatform.IOS;
                     break;
                 default:
@@ -862,15 +862,15 @@ public class DownloadManager : MonoBehaviour
 
 
     /// <summary>
-    /// ╢сж╦╤╗╣дUrl обть╟Ф╠╬кВрЩпео╒ё╛хГ╧Шсппб╟Ф╠╬тР╩АобтьуШ╦ЖBundleап╠М╨мBMConfiger.
+    /// О©╫О©╫ж╦О©╫О©╫О©╫О©╫Url О©╫О©╫О©╫ь╟Ф╠╬О©╫О©╫О©╫О©╫О©╫О©╫о╒О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫б╟Ф╠╬О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫BundleО©╫п╠О©╫О©╫BMConfiger.
     /// </summary>
-    /// <param name="versionInfo"> сцсз╢╚хКобть╣дURlрт╪╟╢╚ЁЖобть╣ц╣╫╣дйЩ╬щ</param>
+    /// <param name="versionInfo"> О©╫О©╫О©╫з╢О©╫О©╫О©╫О©╫О©╫О©╫ь╣О©╫URlО©╫т╪О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ь╣ц╣О©╫О©╫О©╫О©╫О©╫О©╫О©╫</param>
     private IEnumerator downloadVersionInfoCo(VersionInfo versionInfo)
     {
         if (string.IsNullOrEmpty(versionInfo.rootUrl))
             yield break;
 
-        versionInfo.listVersion = 0;//ж╣н╙0╢З╠Мversionн╙нчп╖в╢л╛
+        versionInfo.listVersion = 0;//ж╣н╙0О©╫О©╫О©╫О©╫versionн╙О©╫О©╫п╖в╢л╛
         versionInfo.bundles = null;
         versionInfo.bmConfiger = null;
 
@@ -892,7 +892,7 @@ public class DownloadManager : MonoBehaviour
 
         versionWWW.Dispose();
 
-        //нчпХ╦Эпб
+        //О©╫О©╫О©╫О©╫О©╫О©╫О©╫
         if(serverBMDataVersion>0&& serverBMDataVersion<=CurrentVesion) yield break;
         if(!string.IsNullOrEmpty(versionInfo.error)) yield break;
 
@@ -1061,18 +1061,18 @@ public class DownloadManager : MonoBehaviour
 
 
     ///<summary>
-    /// ЁУй╪╩╞╠╬о╣мЁ,╠ьпКотй╬╣Всц╨╞йЩ╡едэЁУй╪╩╞DownloadManager╣д╣╔юЩ
+    /// О©╫О©╫й╪О©╫О©╫О©╫О©╫о╣мЁ,О©╫О©╫О©╫О©╫О©╫О©╫й╬О©╫О©╫О©╫ц╨О©╫О©╫О©╫О©╫О©╫О©╫эЁО©╫й╪О©╫О©╫DownloadManagerО©╫д╣О©╫О©╫О©╫
     /// 
-    /// ЁУй╪╩╞й╠ё╛о╣мЁ╩А╢сж╦╤╗╣дн╩жцобтьBM.dataё╛х╩╨С╦Ы╬щкЭю╢╫╗а╒Bundleж╝╪Д╣дрюю╣╧ьо╣╨мхГ╨нобтьц©╦Жbundle╣дпео╒
+    /// О©╫О©╫й╪О©╫О©╫й╠О©╫О©╫о╣мЁО©╫О©╫О©╫ж╦О©╫О©╫О©╫О©╫н╩О©╫О©╫О©╫О©╫О©╫О©╫BM.dataО©╫О©╫х╩О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫Bundleж╝О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫о╣О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ц©О©╫О©╫bundleО©╫О©╫О©╫О©╫о╒
     /// 
-    /// ╬╜╧Щ╦да╪╨С╣до╣мЁ╩Атз╠Ю╪╜й╠лА╧╘а╫╦ЖURLвВн╙обтьBundleрт╪╟BM.data╣дб╥╬╤
-    /// р╩╦ЖйгRemoteDownloadUrl,р╩╦ЖйгLocalDownloadUrl.
+    /// О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫о╣мЁО©╫О©╫О©╫з╠Ю╪╜й╠О©╫А╧╘О©╫О©╫О©╫О©╫URLО©╫О©╫н╙О©╫О©╫О©╫О©╫BundleО©╫т╪О©╫BM.dataО©╫О©╫б╥О©╫О©╫
+    /// р╩О©╫О©╫О©╫О©╫RemoteDownloadUrl,р╩О©╫О©╫О©╫О©╫LocalDownloadUrl.
     /// 
-    /// LocalDownloadUrlйгн╩сзAppдз╣добтьб╥╬╤,уБюОцФ╣др╩лввйт╢йгтз╟╡в╟╣дй╠╨Рря╬╜╢Фтзсзсц╩╖╣дйж╩З
-    /// RemoteDownloadUrl йгн╩сз╩╔а╙мЬио╣д╥ЧнЯфВ╣добтьб╥╬╤ё╛м╗Ёё╟я╨СпЬ╣д╦Эпб╟Э╤╪тзуБ╦Жб╥╬╤
+    /// LocalDownloadUrlО©╫О©╫н╩О©╫О©╫AppО©╫з╣О©╫О©╫О©╫О©╫О©╫б╥О©╫О©╫,О©╫О©╫О©╫О©╫О©╫О©╫О©╫р╩О©╫О©╫О©╫О©╫т╢О©╫О©╫О©╫з╟О©╫в╟О©╫О©╫й╠О©╫О©╫О©╫я╬О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ц╩О©╫О©╫О©╫О©╫ж╩О©╫
+    /// RemoteDownloadUrl О©╫О©╫н╩О©╫з╩О©╫О©╫О©╫О©╫О©╫О©╫о╣д╥О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫б╥О©╫О©╫О©╫О©╫м╗О©╫О©╫О©╫я╨О©╫О©╫О©╫О©╫д╦О©╫О©╫б╟О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫б╥О©╫О©╫
     /// 
-    /// ЁУй╪╩╞╣дй╠╩Айтм╪╢сRemoteDownload╣д╦Ын╩жц╩Ях║р╩╦ЖBMDataVersion.txt
-    /// уБ╦Жнд╠╬нд╪Чжп╪гб╪р╩╦ЖуШпнйЩвжё╛сцуБ╦ЖйЩвжю╢╦ЭпбBM.data
+    /// О©╫О©╫й╪О©╫О©╫О©╫О©╫й╠О©╫О©╫О©╫О©╫м╪О©╫О©╫RemoteDownloadО©╫д╦О©╫н╩О©╫ц╩О©╫х║р╩О©╫О©╫BMDataVersion.txt
+    /// О©╫О©╫О©╫О©╫д╠О©╫О©╫д╪О©╫О©╫п╪О©╫б╪р╩О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫жёО©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫BM.data
     /// </summary>>
     public static void Initialize()
     {

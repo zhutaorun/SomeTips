@@ -172,7 +172,7 @@ public class BuildConfiger
         {
             switch (UnityBuildTarget)
             {
-                case BuildTarget.StandaloneGLESEmu:
+                //case BuildTarget.StandaloneGLESEmu:
                 case BuildTarget.StandaloneLinux:
                 case BuildTarget.StandaloneLinux64:
                 case BuildTarget.StandaloneLinuxUniversal:
